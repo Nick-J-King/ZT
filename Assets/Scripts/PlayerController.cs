@@ -24,75 +24,10 @@ public class PlayerController : MonoBehaviour
     public Toggle toggleAnimate;
 
 
-    private int myNumVerts0;
-    private int myNumTriangles0;
-    private List<Vector3> myVerts0;
-    private List<int> myTriangles0;
-
-    private int myNumVerts1;
-    private int myNumTriangles1;
-    private List<Vector3> myVerts1;
-    private List<int> myTriangles1;
-
-    private int myNumVerts2;
-    private int myNumTriangles2;
-    private List<Vector3> myVerts2;
-    private List<int> myTriangles2;
-
-    private int myNumVerts3;
-    private int myNumTriangles3;
-    private List<Vector3> myVerts3;
-    private List<int> myTriangles3;
-
-    private int myNumVerts4;
-    private int myNumTriangles4;
-    private List<Vector3> myVerts4;
-    private List<int> myTriangles4;
-
-    private int myNumVerts5;
-    private int myNumTriangles5;
-    private List<Vector3> myVerts5;
-    private List<int> myTriangles5;
-
-    private int myNumVerts6;
-    private int myNumTriangles6;
-    private List<Vector3> myVerts6;
-    private List<int> myTriangles6;
-
-    private int myNumVerts7;
-    private int myNumTriangles7;
-    private List<Vector3> myVerts7;
-    private List<int> myTriangles7;
-
-    private int myNumVerts8;
-    private int myNumTriangles8;
-    private List<Vector3> myVerts8;
-    private List<int> myTriangles8;
-
-    private int myNumVerts9;
-    private int myNumTriangles9;
-    private List<Vector3> myVerts9;
-    private List<int> myTriangles9;
-
-    private int myNumVerts10;
-    private int myNumTriangles10;
-    private List<Vector3> myVerts10;
-    private List<int> myTriangles10;
-
-    private int myNumVerts11;
-    private int myNumTriangles11;
-    private List<Vector3> myVerts11;
-    private List<int> myTriangles11;
-
-    private int myNumVerts12;
-    private int myNumTriangles12;
-    private List<Vector3> myVerts12;
-    private List<int> myTriangles12;
-
-    private int myNumVerts13;
-    private int myNumTriangles13;
-    private List<Vector3> myVerts13;
-    private List<int> myTriangles13;
+    public int [] myNumVerts;
+    public int [] myNumTriangles;
+    public List<Vector3> [] myVerts;
+    public List<int> [] myTriangles;
 
     private float size;
     private float sizeOnTwo;
@@ -104,6 +39,8 @@ public class PlayerController : MonoBehaviour
     private float fullMax;
 
     public GameObject mfMain;
+
+    public MeshFilter[] mfSub;  // Point to the 14 "sub meshes"
 
     public MeshFilter mfMain0;
     public MeshFilter mfMain1;
@@ -128,6 +65,28 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        mfSub = new MeshFilter[14];
+
+        mfSub[0] = mfMain0;
+        mfSub[1] = mfMain1;
+        mfSub[2] = mfMain2;
+        mfSub[3] = mfMain3;
+        mfSub[4] = mfMain4;
+        mfSub[5] = mfMain5;
+        mfSub[6] = mfMain6;
+        mfSub[7] = mfMain7;
+        mfSub[8] = mfMain8;
+        mfSub[9] = mfMain9;
+        mfSub[10] = mfMain10;
+        mfSub[11] = mfMain11;
+        mfSub[12] = mfMain12;
+        mfSub[13] = mfMain13;
+
+        myNumVerts = new int[14];
+        myNumTriangles = new int[14];
+        myVerts = new List<Vector3>[14];
+        myTriangles = new List<int>[14];
+
         myList = new ArrayList();
 
         nDivisions = 50;                    // <<<
@@ -182,13 +141,13 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    public void ResetMesh(ref int numVerts, ref int numTriangles, ref List<Vector3> verts, ref List<int> triangles, ref MeshFilter mf)
+    public void ResetMesh(int mesh)
     {
-        numVerts = 0;
-        numTriangles = 0;
-        verts = new List<Vector3>();
-        triangles = new List<int>();
-        mf.mesh.Clear();
+        myNumVerts[mesh] = 0;
+        myNumTriangles[mesh] = 0;
+        myVerts[mesh] = new List<Vector3>();
+        myTriangles[mesh] = new List<int>();
+        mfSub[mesh].mesh.Clear();
     }
 
 
@@ -223,22 +182,10 @@ public class PlayerController : MonoBehaviour
 
         scale = size / max * vertexSize + 0.06f;
 
-
-        ResetMesh(ref myNumVerts0, ref myNumTriangles0, ref myVerts0, ref myTriangles0, ref mfMain0);
-        ResetMesh(ref myNumVerts1, ref myNumTriangles1, ref myVerts1, ref myTriangles1, ref mfMain1);
-        ResetMesh(ref myNumVerts2, ref myNumTriangles2, ref myVerts2, ref myTriangles2, ref mfMain2);
-        ResetMesh(ref myNumVerts3, ref myNumTriangles3, ref myVerts3, ref myTriangles3, ref mfMain3);
-        ResetMesh(ref myNumVerts4, ref myNumTriangles4, ref myVerts4, ref myTriangles4, ref mfMain4);
-        ResetMesh(ref myNumVerts5, ref myNumTriangles5, ref myVerts5, ref myTriangles5, ref mfMain5);
-        ResetMesh(ref myNumVerts6, ref myNumTriangles6, ref myVerts6, ref myTriangles6, ref mfMain6);
-        ResetMesh(ref myNumVerts7, ref myNumTriangles7, ref myVerts7, ref myTriangles7, ref mfMain7);
-        ResetMesh(ref myNumVerts8, ref myNumTriangles8, ref myVerts8, ref myTriangles8, ref mfMain8);
-        ResetMesh(ref myNumVerts9, ref myNumTriangles9, ref myVerts9, ref myTriangles9, ref mfMain9);
-        ResetMesh(ref myNumVerts10, ref myNumTriangles10, ref myVerts10, ref myTriangles10, ref mfMain10);
-        ResetMesh(ref myNumVerts11, ref myNumTriangles11, ref myVerts11, ref myTriangles11, ref mfMain11);
-        ResetMesh(ref myNumVerts12, ref myNumTriangles12, ref myVerts12, ref myTriangles12, ref mfMain12);
-        ResetMesh(ref myNumVerts13, ref myNumTriangles13, ref myVerts13, ref myTriangles13, ref mfMain13);
-
+        for (int i = 0; i < 14; i++)
+        {
+            ResetMesh(i);
+        }
 
         float x0;
         float y0;
@@ -303,7 +250,6 @@ public class PlayerController : MonoBehaviour
                         if (nIsSet111 == 0) nSet++;
 
                         if (nIsSet000 == 0 && togglePoints.isOn)
-                        //if (false)
                         {
                             s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                             s.transform.parent = mfMain.transform;
@@ -311,17 +257,7 @@ public class PlayerController : MonoBehaviour
                             s.transform.localPosition = v000;
                             s.transform.localScale = new Vector3(scale, scale, scale);
 
-
                             myList.Add(s);
-
-                            //AddQuadBoth(v000, v010, v001, v011, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // x-
-                            //AddQuadBoth(v000, v001, v100, v101, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // y-
-                            //AddQuadBoth(v000, v100, v010, v110, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // z-
-
-                            //AddQuadBoth(v100, v110, v101, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // x+
-                            //AddQuadBoth(v010, v011, v110, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // y+
-                            //AddQuadBoth(v001, v101, v011, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // z+
-
                         }
 
 
@@ -335,37 +271,37 @@ public class PlayerController : MonoBehaviour
 
                         // Diagonals across faces
 
-                        CheckQuads(nIsSet000, v000, nIsSet011, v011, nIsSet100, v100, nIsSet111, v111, ref myNumVerts3, ref myVerts3, ref myTriangles3);    // Along x
-                        CheckQuads(nIsSet010, v010, nIsSet001, v001, nIsSet110, v110, nIsSet101, v101, ref myNumVerts4, ref myVerts4, ref myTriangles4);    // Along x
+                        CheckQuads(nIsSet000, v000, nIsSet011, v011, nIsSet100, v100, nIsSet111, v111, 3);    // Along x
+                        CheckQuads(nIsSet010, v010, nIsSet001, v001, nIsSet110, v110, nIsSet101, v101, 4);    // Along x
 
-                        CheckQuads(nIsSet000, v000, nIsSet101, v101, nIsSet010, v010, nIsSet111, v111, ref myNumVerts5, ref myVerts5, ref myTriangles5);    // Along y
-                        CheckQuads(nIsSet100, v100, nIsSet001, v001, nIsSet110, v110, nIsSet011, v011, ref myNumVerts6, ref myVerts6, ref myTriangles6);    // Along y
+                        CheckQuads(nIsSet000, v000, nIsSet101, v101, nIsSet010, v010, nIsSet111, v111, 5);    // Along y
+                        CheckQuads(nIsSet100, v100, nIsSet001, v001, nIsSet110, v110, nIsSet011, v011, 6);    // Along y
 
-                        CheckQuads(nIsSet000, v000, nIsSet110, v110, nIsSet001, v001, nIsSet111, v111, ref myNumVerts7, ref myVerts7, ref myTriangles7);    // Along z
-                        CheckQuads(nIsSet100, v100, nIsSet010, v010, nIsSet101, v101, nIsSet011, v011, ref myNumVerts8, ref myVerts8, ref myTriangles8);    // Along z
+                        CheckQuads(nIsSet000, v000, nIsSet110, v110, nIsSet001, v001, nIsSet111, v111, 7);    // Along z
+                        CheckQuads(nIsSet100, v100, nIsSet010, v010, nIsSet101, v101, nIsSet011, v011, 8);    // Along z
 
 
                         // Flat faces
 
-                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, ref myNumVerts0, ref myVerts0, ref myTriangles0);    // Along x = 0
-                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet100, v100, nIsSet101, v101, ref myNumVerts1, ref myVerts1, ref myTriangles1);    // Along y = 0
-                        CheckQuads(nIsSet000, v000, nIsSet010, v010, nIsSet100, v100, nIsSet110, v110, ref myNumVerts2, ref myVerts2, ref myTriangles2);    // Along z = 0
+                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, 0);    // Along x = 0
+                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet100, v100, nIsSet101, v101, 1);    // Along y = 0
+                        CheckQuads(nIsSet000, v000, nIsSet010, v010, nIsSet100, v100, nIsSet110, v110, 2);    // Along z = 0
 
 
                         // Do cases of 3 "on" corners now!
 
                         // Corners
 
-                        CheckTriangle(nIsSet001, v001, nIsSet010, v010, nIsSet100, v100, ref myNumVerts9, ref myVerts9, ref myTriangles9);      // Around 000
-                        CheckTriangle(nIsSet000, v000, nIsSet101, v101, nIsSet110, v110, ref myNumVerts10, ref myVerts10, ref myTriangles10);   // Around 100
-                        CheckTriangle(nIsSet100, v100, nIsSet111, v111, nIsSet001, v001, ref myNumVerts11, ref myVerts11, ref myTriangles11);   // Around 101
-                        CheckTriangle(nIsSet111, v111, nIsSet100, v100, nIsSet010, v010, ref myNumVerts12, ref myVerts12, ref myTriangles12);   // Around 110
+                        CheckTriangle(nIsSet001, v001, nIsSet010, v010, nIsSet100, v100, 9);      // Around 000
+                        CheckTriangle(nIsSet000, v000, nIsSet101, v101, nIsSet110, v110, 10);   // Around 100
+                        CheckTriangle(nIsSet100, v100, nIsSet111, v111, nIsSet001, v001, 11);   // Around 101
+                        CheckTriangle(nIsSet111, v111, nIsSet100, v100, nIsSet010, v010, 12);   // Around 110
 
-                        CheckTriangle(nIsSet110, v110, nIsSet101, v101, nIsSet011, v011, ref myNumVerts9, ref myVerts9, ref myTriangles9);   // Around 111
-                        CheckTriangle(nIsSet110, v110, nIsSet000, v000, nIsSet011, v011, ref myNumVerts11, ref myVerts11, ref myTriangles11);   // Around 010
+                        CheckTriangle(nIsSet110, v110, nIsSet101, v101, nIsSet011, v011, 9);   // Around 111
+                        CheckTriangle(nIsSet110, v110, nIsSet000, v000, nIsSet011, v011, 11);   // Around 010
 
-                        CheckTriangle(nIsSet111, v111, nIsSet001, v001, nIsSet010, v010, ref myNumVerts10, ref myVerts10, ref myTriangles10);   // Around 011
-                        CheckTriangle(nIsSet101, v101, nIsSet011, v011, nIsSet000, v000, ref myNumVerts12, ref myVerts12, ref myTriangles12);   // Around 001
+                        CheckTriangle(nIsSet111, v111, nIsSet001, v001, nIsSet010, v010, 10);   // Around 011
+                        CheckTriangle(nIsSet101, v101, nIsSet011, v011, nIsSet000, v000, 12);   // Around 001
 
                         /*
 
@@ -378,13 +314,13 @@ public class PlayerController : MonoBehaviour
                         {
                             if (nSet >= 13)
                             {
-                                AddQuadBoth(v000, v010, v001, v011, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // x-
-                                AddQuadBoth(v000, v001, v100, v101, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // y-
-                                AddQuadBoth(v000, v100, v010, v110, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // z-
+                                AddQuadBoth(v000, v010, v001, v011, 13);    // x-
+                                AddQuadBoth(v000, v001, v100, v101, 13);    // y-
+                                AddQuadBoth(v000, v100, v010, v110, 13);    // z-
 
-                                AddQuadBoth(v100, v110, v101, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // x+
-                                AddQuadBoth(v010, v011, v110, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // y+
-                                AddQuadBoth(v001, v101, v011, v111, ref myNumVerts13, ref myVerts13, ref myTriangles13);    // z+
+                                AddQuadBoth(v100, v110, v101, v111, 13);    // x+
+                                AddQuadBoth(v010, v011, v110, v111, 13);    // y+
+                                AddQuadBoth(v001, v101, v011, v111, 13);    // z+
                             }
                         }
                     }
@@ -393,113 +329,103 @@ public class PlayerController : MonoBehaviour
         }
 
         //
-        ProcessMesh(ref mfMain0, ref myVerts0, ref myTriangles0);
-        ProcessMesh(ref mfMain1, ref myVerts1, ref myTriangles1);
-        ProcessMesh(ref mfMain2, ref myVerts2, ref myTriangles2);
-        ProcessMesh(ref mfMain3, ref myVerts3, ref myTriangles3);
-        ProcessMesh(ref mfMain4, ref myVerts4, ref myTriangles4);
-        ProcessMesh(ref mfMain5, ref myVerts5, ref myTriangles5);
-        ProcessMesh(ref mfMain6, ref myVerts6, ref myTriangles6);
-        ProcessMesh(ref mfMain7, ref myVerts7, ref myTriangles7);
-        ProcessMesh(ref mfMain8, ref myVerts8, ref myTriangles8);
-        ProcessMesh(ref mfMain9, ref myVerts9, ref myTriangles9);
-        ProcessMesh(ref mfMain10, ref myVerts10, ref myTriangles10);
-        ProcessMesh(ref mfMain11, ref myVerts11, ref myTriangles11);
-        ProcessMesh(ref mfMain12, ref myVerts12, ref myTriangles12);
-        ProcessMesh(ref mfMain13, ref myVerts13, ref myTriangles13);
+        for (int i = 0; i < 14; i++)
+        {
+            ProcessMesh(i);
+        }
     }
 
 
-    public void ProcessMesh(ref MeshFilter mf, ref List<Vector3> verts, ref List<int> triangles)
+    public void ProcessMesh(int mesh)
     {
-        mf.mesh.vertices = verts.ToArray();
-        mf.mesh.triangles = triangles.ToArray();
-        mf.mesh.RecalculateBounds();
-        mf.mesh.RecalculateNormals();
+        mfSub[mesh].mesh.vertices = myVerts[mesh].ToArray();
+        mfSub[mesh].mesh.triangles = myTriangles[mesh].ToArray();
+        mfSub[mesh].mesh.RecalculateBounds();
+        mfSub[mesh].mesh.RecalculateNormals();
     }
 
 
-    public void CheckQuads(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int in11, Vector3 v11, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    public void CheckQuads(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int in11, Vector3 v11, int mesh)
     {
         if (in00 == 0 && in01 == 0 && in10 == 0 && in11 == 0)
         {
-            AddQuadBoth(v00, v01, v10, v11, ref numVerts, ref verts, ref triangles);
+            AddQuadBoth(v00, v01, v10, v11, mesh);
         }
         else
         {
-            CheckTriangle(in01, v01, in10, v10, in11, v11, ref numVerts, ref verts, ref triangles);
-            CheckTriangle(in00, v00, in10, v10, in11, v11, ref numVerts, ref verts, ref triangles);
-            CheckTriangle(in00, v00, in01, v01, in11, v11, ref numVerts, ref verts, ref triangles);
-            CheckTriangle(in00, v00, in01, v01, in10, v10, ref numVerts, ref verts, ref triangles);
+            CheckTriangle(in01, v01, in10, v10, in11, v11, mesh);
+            CheckTriangle(in00, v00, in10, v10, in11, v11, mesh);
+            CheckTriangle(in00, v00, in01, v01, in11, v11, mesh);
+            CheckTriangle(in00, v00, in01, v01, in10, v10, mesh);
         }
     }
 
-    public void CheckTriangle(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    public void CheckTriangle(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int mesh)
     {
         if (in00 == 0 && in01 == 0 && in10 == 0)
         {
-            AddTriangleBoth(v00, v01, v10, ref numVerts, ref verts, ref triangles);
+            AddTriangleBoth(v00, v01, v10, mesh);
         }
     }
 
 
-    public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
         ///if (myNumVerts > MAXTRIANGLES) return;
 
-        verts.Add(v00);
-        verts.Add(v10);
-        verts.Add(v01);
-        verts.Add(v11);
+        myVerts[mesh].Add(v00);
+        myVerts[mesh].Add(v10);
+        myVerts[mesh].Add(v01);
+        myVerts[mesh].Add(v11);
 
-        verts.Add(v00);
-        verts.Add(v10);
-        verts.Add(v01);
-        verts.Add(v11);
+        myVerts[mesh].Add(v00);
+        myVerts[mesh].Add(v10);
+        myVerts[mesh].Add(v01);
+        myVerts[mesh].Add(v11);
 
-        triangles.Add(numVerts + 0);
-        triangles.Add(numVerts + 2);
-        triangles.Add(numVerts + 1);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 0);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1);
 
-        triangles.Add(numVerts + 2);
-        triangles.Add(numVerts + 3);
-        triangles.Add(numVerts + 1);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 3);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1);
 
         // Other side;
-        triangles.Add(numVerts + 0 + 4);
-        triangles.Add(numVerts + 1 + 4);
-        triangles.Add(numVerts + 2 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 0 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2 + 4);
 
-        triangles.Add(numVerts + 2 + 4);
-        triangles.Add(numVerts + 1 + 4);
-        triangles.Add(numVerts + 3 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1 + 4);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 3 + 4);
 
-        numVerts += 8;
+        myNumVerts[mesh] += 8;
     }
 
 
-    public void AddTriangleBoth(Vector3 v00, Vector3 v01, Vector3 v10, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    public void AddTriangleBoth(Vector3 v00, Vector3 v01, Vector3 v10, int mesh)
     {
         //if (numVerts > MAXTRIANGLES) return;
 
-        verts.Add(v00);
-        verts.Add(v01);
-        verts.Add(v10);
+        myVerts[mesh].Add(v00);
+        myVerts[mesh].Add(v01);
+        myVerts[mesh].Add(v10);
 
-        verts.Add(v00);
-        verts.Add(v10);
-        verts.Add(v01);
+        myVerts[mesh].Add(v00);
+        myVerts[mesh].Add(v10);
+        myVerts[mesh].Add(v01);
 
-        triangles.Add(numVerts + 0);
-        triangles.Add(numVerts + 2);
-        triangles.Add(numVerts + 1);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 0);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1);
 
         // Other side;
-        triangles.Add(numVerts + 0 + 3);
-        triangles.Add(numVerts + 2 + 3);
-        triangles.Add(numVerts + 1 + 3);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 0 + 3);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 2 + 3);
+        myTriangles[mesh].Add(myNumVerts[mesh] + 1 + 3);
 
-        numVerts += 6;
+        myNumVerts[mesh] += 6;
     }
 
 
