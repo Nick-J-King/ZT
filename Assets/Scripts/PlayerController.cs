@@ -4,7 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 // Player controller
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
     public Slider sliderDivisions;
     public Text textDivisions;
@@ -135,7 +136,7 @@ public class PlayerController : MonoBehaviour {
 
 
         CheckSliders();
-	}
+    }
 
     // called per frame, before performing physics
     void FixedUpdate()
@@ -167,7 +168,7 @@ public class PlayerController : MonoBehaviour {
         float x = sliderLightElevation.value;
         float z = 0.0f;
 
-        directionalLight.transform.localRotation = Quaternion.Euler(x,y,z);
+        directionalLight.transform.localRotation = Quaternion.Euler(x, y, z);
         directionalLight.transform.localPosition = Vector3.zero;
     }
 
@@ -302,7 +303,8 @@ public class PlayerController : MonoBehaviour {
                         }
 
 
-                        if (nSet > 4) {
+                        if (nSet > 4)
+                        {
                             // Handle "hard cases"...
                             // NOTE: Don't confuse the "clean" cases below with extraneous points on...
                         }
@@ -338,18 +340,11 @@ public class PlayerController : MonoBehaviour {
 
                         // Flat faces
 
-                        if (nIsSet000 == 0 && nIsSet001 == 0 && nIsSet010 == 0 && nIsSet011 == 0)
-                        {
-                            AddQuadBoth(v000, v001, v010, v011, ref myNumVerts0, ref myVerts0, ref myTriangles0);    // Along x = 0
-                        }
-                        if (nIsSet000 == 0 && nIsSet001 == 0 && nIsSet100 == 0 && nIsSet101 == 0)
-                        {
-                            AddQuadBoth(v000, v001, v100, v101, ref myNumVerts1, ref myVerts1, ref myTriangles1);    // Along y = 0
-                        }
-                        if (nIsSet000 == 0 && nIsSet010 == 0 && nIsSet100 == 0 && nIsSet110 == 0)
-                        {
-                            AddQuadBoth(v000, v010, v100, v110, ref myNumVerts2, ref myVerts2, ref myTriangles2);    // Along z = 0
-                        }
+                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, ref myNumVerts0, ref myVerts0, ref myTriangles0);    // Along x = 0
+                        CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet100, v100, nIsSet101, v101, ref myNumVerts1, ref myVerts1, ref myTriangles1);    // Along y = 0
+                        CheckQuads(nIsSet000, v000, nIsSet010, v010, nIsSet100, v100, nIsSet110, v110, ref myNumVerts2, ref myVerts2, ref myTriangles2);    // Along z = 0
+
+                        /*
 
                         // Do cases of 3 "on" corners now!
 
@@ -369,7 +364,7 @@ public class PlayerController : MonoBehaviour {
                         }
                         if (nIsSet111 == 0 && nIsSet100 == 0 && nIsSet010 == 0)
                         {
-                           AddTriangleBoth(v111, v100, v010, ref myNumVerts12, ref myVerts12, ref myTriangles12);    // Around 110 BottomLeftBack
+                            AddTriangleBoth(v111, v100, v010, ref myNumVerts12, ref myVerts12, ref myTriangles12);    // Around 110 BottomLeftBack
                         }
                         if (nIsSet110 == 0 && nIsSet101 == 0 && nIsSet011 == 0)
                         {
@@ -391,6 +386,7 @@ public class PlayerController : MonoBehaviour {
                         // Do cases of 2 "on" corners... ("edges")
 
                         // Do cases of 1 "on" corners... ("vertices")
+                        */
 
                         //else
                         {
@@ -433,6 +429,15 @@ public class PlayerController : MonoBehaviour {
         mf.mesh.triangles = triangles.ToArray();
         mf.mesh.RecalculateBounds();
         mf.mesh.RecalculateNormals();
+    }
+
+
+    public void CheckQuads(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int in11, Vector3 v11, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    {
+        if (in00 == 0 && in01 == 0 && in10 == 0 && in11 == 0)
+        {
+            AddQuadBoth(v00, v01, v10, v11, ref numVerts, ref verts, ref triangles);
+        }
     }
 
 
