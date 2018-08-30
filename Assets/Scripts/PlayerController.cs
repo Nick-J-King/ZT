@@ -402,6 +402,13 @@ public class PlayerController : MonoBehaviour
         {
             AddQuadBoth(v00, v01, v10, v11, ref numVerts, ref verts, ref triangles);
         }
+        else
+        {
+            CheckTriangle(in01, v01, in10, v10, in11, v11, ref numVerts, ref verts, ref triangles);
+            CheckTriangle(in00, v00, in10, v10, in11, v11, ref numVerts, ref verts, ref triangles);
+            CheckTriangle(in00, v00, in01, v01, in11, v11, ref numVerts, ref verts, ref triangles);
+            CheckTriangle(in00, v00, in01, v01, in10, v10, ref numVerts, ref verts, ref triangles);
+        }
     }
 
     public void CheckTriangle(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
