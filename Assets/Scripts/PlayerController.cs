@@ -98,8 +98,10 @@ public class PlayerController : MonoBehaviour
     private float sizeOnTwo;
     private float scale;
 
-    private int nDivisions;
+    private int nDivisions;     // "Main" divisions.
+    private int nFullDivisions; // nDivisions * 8 for finers sub-divisions.
     private float max;
+    private float fullMax;
 
     public GameObject mfMain;
 
@@ -128,20 +130,23 @@ public class PlayerController : MonoBehaviour
     {
         myList = new ArrayList();
 
-        nDivisions = 50;    // <<<
+        nDivisions = 50;                    // <<<
+        nFullDivisions = nDivisions * 8;    // <<<
 
 
-        size = 10.0f;       // <<<
-        sizeOnTwo = size / 2.0f;
+        size = 10.0f;               // Size of the "configuration cube".
+        sizeOnTwo = size / 2.0f;    // Used to center the cube.
 
 
         CheckSliders();
     }
 
+
     // called per frame, before performing physics
     void FixedUpdate()
     {
     }
+
 
     // called per frame, before performing physics
     void Update()
@@ -152,15 +157,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+
     private float intToFloat(int coord)
     {
-        return (float)coord / max;
+        return (float)coord / fullMax;
     }
 
+
+    // Convert float coord (0 - 1) into world coordinate.
     private float cubeToWorld(float coord)
     {
         return coord * size - sizeOnTwo;
     }
+
 
     public void CheckLight()
     {
@@ -172,6 +181,7 @@ public class PlayerController : MonoBehaviour
         directionalLight.transform.localPosition = Vector3.zero;
     }
 
+
     public void ResetMesh(ref int numVerts, ref int numTriangles, ref List<Vector3> verts, ref List<int> triangles, ref MeshFilter mf)
     {
         numVerts = 0;
@@ -180,6 +190,7 @@ public class PlayerController : MonoBehaviour
         triangles = new List<int>();
         mf.mesh.Clear();
     }
+
 
     public void CheckSliders()
     {
@@ -191,20 +202,24 @@ public class PlayerController : MonoBehaviour
         }
 
         nDivisions = (int)sliderDivisions.value;
-        textDivisions.text = "Max edge: " + nDivisions.ToString();
+        nFullDivisions = nDivisions * 8;
+
+        textDivisions.text = "Max edge: " + nDivisions.ToString() + " (" + nFullDivisions.ToString() + ")";
 
 
         float sliderFloat = slider4thEdge.value;
         int sliderInt = (int)(sliderFloat * (nDivisions + 1));
         if (sliderInt > nDivisions) sliderInt = nDivisions;
+        int sliderFullInt = sliderInt * 8;
 
-        text4thEdge.text = "4th edge: " + sliderInt.ToString();    // + " " + sliderFloat.ToString();
+        text4thEdge.text = "4th edge: " + sliderInt.ToString() + " (" + sliderFullInt.ToString() + ")";    // + " " + sliderFloat.ToString();
 
 
         float vertexSize = sliderVertexSize.value;
 
 
         max = (float)nDivisions;
+        fullMax = (float)nFullDivisions;
 
         scale = size / max * vertexSize + 0.06f;
 
@@ -228,45 +243,52 @@ public class PlayerController : MonoBehaviour
         float x0;
         float y0;
         float z0;
-        float x1;
-        float y1;
-        float z1;
+
+        float x8;
+        float y8;
+        float z8;
 
         for (int intX = 0; intX <= nDivisions; intX++)
         {
-            x0 = cubeToWorld(intToFloat(intX));
-            x1 = cubeToWorld(intToFloat(intX + 1));
+            int intXfull = intX * 8;
+
+            x0 = cubeToWorld(intToFloat(intXfull));
+            x8 = cubeToWorld(intToFloat(intXfull + 8));
 
             for (int intY = 0; intY <= nDivisions; intY++)
             {
-                y0 = cubeToWorld(intToFloat(intY));
-                y1 = cubeToWorld(intToFloat(intY + 1));
+                int intYfull = intY * 8;
+
+                y0 = cubeToWorld(intToFloat(intYfull));
+                y8 = cubeToWorld(intToFloat(intYfull + 8));
 
                 for (int intZ = 0; intZ <= nDivisions; intZ++)
                 {
-                    z0 = cubeToWorld(intToFloat(intZ));
-                    z1 = cubeToWorld(intToFloat(intZ + 1));
+                    int intZfull = intZ * 8;
+
+                    z0 = cubeToWorld(intToFloat(intZfull));
+                    z8 = cubeToWorld(intToFloat(intZfull + 8));
 
 
                     //if (x > y && y > z)
                     {
-                        int nIsSet000 = CanFormTriangle4Int(intX, intY, intZ, sliderInt);
-                        int nIsSet100 = CanFormTriangle4Int(intX + 1, intY, intZ, sliderInt);
-                        int nIsSet010 = CanFormTriangle4Int(intX, intY + 1, intZ, sliderInt);
-                        int nIsSet110 = CanFormTriangle4Int(intX + 1, intY + 1, intZ, sliderInt);
-                        int nIsSet001 = CanFormTriangle4Int(intX, intY, intZ + 1, sliderInt);
-                        int nIsSet101 = CanFormTriangle4Int(intX + 1, intY, intZ + 1, sliderInt);
-                        int nIsSet011 = CanFormTriangle4Int(intX, intY + 1, intZ + 1, sliderInt);
-                        int nIsSet111 = CanFormTriangle4Int(intX + 1, intY + 1, intZ + 1, sliderInt);
+                        int nIsSet000 = CanFormTriangle4Int(intXfull, intYfull, intZfull, sliderFullInt);
+                        int nIsSet100 = CanFormTriangle4Int(intXfull + 8, intYfull, intZfull, sliderFullInt);
+                        int nIsSet010 = CanFormTriangle4Int(intXfull, intYfull + 8, intZfull, sliderFullInt);
+                        int nIsSet110 = CanFormTriangle4Int(intXfull + 8, intYfull + 8, intZfull, sliderFullInt);
+                        int nIsSet001 = CanFormTriangle4Int(intXfull, intYfull, intZfull + 8, sliderFullInt);
+                        int nIsSet101 = CanFormTriangle4Int(intXfull + 8, intYfull, intZfull + 8, sliderFullInt);
+                        int nIsSet011 = CanFormTriangle4Int(intXfull, intYfull + 8, intZfull + 8, sliderFullInt);
+                        int nIsSet111 = CanFormTriangle4Int(intXfull + 8, intYfull + 8, intZfull + 8, sliderFullInt);
 
                         Vector3 v000 = new Vector3(x0, y0, z0);
-                        Vector3 v100 = new Vector3(x1, y0, z0);
-                        Vector3 v010 = new Vector3(x0, y1, z0);
-                        Vector3 v110 = new Vector3(x1, y1, z0);
-                        Vector3 v001 = new Vector3(x0, y0, z1);
-                        Vector3 v101 = new Vector3(x1, y0, z1);
-                        Vector3 v011 = new Vector3(x0, y1, z1);
-                        Vector3 v111 = new Vector3(x1, y1, z1);
+                        Vector3 v100 = new Vector3(x8, y0, z0);
+                        Vector3 v010 = new Vector3(x0, y8, z0);
+                        Vector3 v110 = new Vector3(x8, y8, z0);
+                        Vector3 v001 = new Vector3(x0, y0, z8);
+                        Vector3 v101 = new Vector3(x8, y0, z8);
+                        Vector3 v011 = new Vector3(x0, y8, z8);
+                        Vector3 v111 = new Vector3(x8, y8, z8);
                         // f
                         //
                         //
@@ -387,6 +409,7 @@ public class PlayerController : MonoBehaviour
         ProcessMesh(ref mfMain13, ref myVerts13, ref myTriangles13);
     }
 
+
     public void ProcessMesh(ref MeshFilter mf, ref List<Vector3> verts, ref List<int> triangles)
     {
         mf.mesh.vertices = verts.ToArray();
@@ -484,10 +507,10 @@ public class PlayerController : MonoBehaviour
 
     public int CanFormTriangle4Int(int s1, int s2, int s3, int s4)
     {
-        if (s1 < 0 || s1 > nDivisions) return -2;
-        if (s2 < 0 || s2 > nDivisions) return -2;
-        if (s3 < 0 || s3 > nDivisions) return -2;
-        if (s4 < 0 || s4 > nDivisions) return -2;
+        if (s1 < 0 || s1 > nFullDivisions) return -2;
+        if (s2 < 0 || s2 > nFullDivisions) return -2;
+        if (s3 < 0 || s3 > nFullDivisions) return -2;
+        if (s4 < 0 || s4 > nFullDivisions) return -2;
 
         int c1 = CanFormTriangleInt(s2, s3, s4);
         int c2 = CanFormTriangleInt(s1, s3, s4);
@@ -510,9 +533,9 @@ public class PlayerController : MonoBehaviour
 
     public int CanFormTriangleInt(int s1, int s2, int s3)
     {
-        if (s1 < 0 || s1 > nDivisions) return -2;
-        if (s2 < 0 || s2 > nDivisions) return -2;
-        if (s3 < 0 || s3 > nDivisions) return -2;
+        if (s1 < 0 || s1 > nFullDivisions) return -2;
+        if (s2 < 0 || s2 > nFullDivisions) return -2;
+        if (s3 < 0 || s3 > nFullDivisions) return -2;
 
         if (s1 > s2 + s3) return -1;
         if (s2 > s1 + s3) return -1;
