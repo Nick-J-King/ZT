@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-
+// Player controller
 public class PlayerController : MonoBehaviour {
 
     public Slider sliderDivisions;
