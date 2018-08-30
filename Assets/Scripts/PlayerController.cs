@@ -334,40 +334,18 @@ public class PlayerController : MonoBehaviour
 
                         // Corners
 
-                        //CheckTriangles(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, ref myNumVerts0, ref myVerts0, ref myTriangles0);    // Along x = 0
-/*
-                        if (nIsSet001 == 0 && nIsSet010 == 0 && nIsSet100 == 0)
-                        {
-                            AddTriangleBoth(v001, v010, v100, ref myNumVerts9, ref myVerts9, ref myTriangles9);    // Around 000
-                        }
-                        if (nIsSet000 == 0 && nIsSet101 == 0 && nIsSet110 == 0 && nIsSet100 != 0 && nIsSet011 != 0)
-                        {
-                            AddTriangleBoth(v000, v101, v110, ref myNumVerts10, ref myVerts10, ref myTriangles10);    // Around 100
-                        }
-                        if (nIsSet100 == 0 && nIsSet111 == 0 && nIsSet001 == 0)
-                        {
-                            AddTriangleBoth(v100, v111, v001, ref myNumVerts11, ref myVerts11, ref myTriangles11);    // Around 101
-                        }
-                        if (nIsSet111 == 0 && nIsSet100 == 0 && nIsSet010 == 0)
-                        {
-                            AddTriangleBoth(v111, v100, v010, ref myNumVerts12, ref myVerts12, ref myTriangles12);    // Around 110 BottomLeftBack
-                        }
-                        if (nIsSet110 == 0 && nIsSet101 == 0 && nIsSet011 == 0)
-                        {
-                            AddTriangleBoth(v110, v101, v011, ref myNumVerts9, ref myVerts9, ref myTriangles9);    // Around 111
-                        }
-                        if (nIsSet110 == 0 && nIsSet000 == 0 && nIsSet011 == 0)
-                        {
-                            AddTriangleBoth(v110, v000, v011, ref myNumVerts11, ref myVerts11, ref myTriangles11);    // Around 010 /// !!!
-                        }
-                        if (nIsSet111 == 0 && nIsSet001 == 0 && nIsSet010 == 0 && nIsSet011 != 0 && nIsSet100 != 0)
-                        {
-                            AddTriangleBoth(v111, v001, v010, ref myNumVerts10, ref myVerts10, ref myTriangles10);    // Around 011 /// !!!
-                        }
-                        if (nIsSet101 == 0 && nIsSet011 == 0 && nIsSet000 == 0)
-                        {
-                            AddTriangleBoth(v101, v011, v000, ref myNumVerts12, ref myVerts12, ref myTriangles12);    // Around 001 BottomLeftBack
-                        }
+                        CheckTriangle(nIsSet001, v001, nIsSet010, v010, nIsSet100, v100, ref myNumVerts9, ref myVerts9, ref myTriangles9);      // Around 000
+                        CheckTriangle(nIsSet000, v000, nIsSet101, v101, nIsSet110, v110, ref myNumVerts10, ref myVerts10, ref myTriangles10);   // Around 100
+                        CheckTriangle(nIsSet100, v100, nIsSet111, v111, nIsSet001, v001, ref myNumVerts11, ref myVerts11, ref myTriangles11);   // Around 101
+                        CheckTriangle(nIsSet111, v111, nIsSet100, v100, nIsSet010, v010, ref myNumVerts12, ref myVerts12, ref myTriangles12);   // Around 110
+
+                        CheckTriangle(nIsSet110, v110, nIsSet101, v101, nIsSet011, v011, ref myNumVerts9, ref myVerts9, ref myTriangles9);   // Around 111
+                        CheckTriangle(nIsSet110, v110, nIsSet000, v000, nIsSet011, v011, ref myNumVerts11, ref myVerts11, ref myTriangles11);   // Around 010
+
+                        CheckTriangle(nIsSet111, v111, nIsSet001, v001, nIsSet010, v010, ref myNumVerts10, ref myVerts10, ref myTriangles10);   // Around 011
+                        CheckTriangle(nIsSet101, v101, nIsSet011, v011, nIsSet000, v000, ref myNumVerts12, ref myVerts12, ref myTriangles12);   // Around 001
+
+                        /*
 
                         // Do cases of 2 "on" corners... ("edges")
 
