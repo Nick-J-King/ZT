@@ -313,30 +313,15 @@ public class PlayerController : MonoBehaviour
 
                         // Diagonals across faces
 
-                        if (nIsSet000 == 0 && nIsSet011 == 0 && nIsSet100 == 0 && nIsSet111 == 0)
-                        {
-                            AddQuadBoth(v000, v011, v100, v111, ref myNumVerts3, ref myVerts3, ref myTriangles3);    // Along x
-                        }
-                        if (nIsSet010 == 0 && nIsSet001 == 0 && nIsSet110 == 0 && nIsSet101 == 0)
-                        {
-                            AddQuadBoth(v010, v001, v110, v101, ref myNumVerts4, ref myVerts4, ref myTriangles4);    // Along x
-                        }
-                        if (nIsSet000 == 0 && nIsSet101 == 0 && nIsSet010 == 0 && nIsSet111 == 0)
-                        {
-                            AddQuadBoth(v000, v101, v010, v111, ref myNumVerts5, ref myVerts5, ref myTriangles5);    // Along y
-                        }
-                        if (nIsSet100 == 0 && nIsSet001 == 0 && nIsSet110 == 0 && nIsSet011 == 0)
-                        {
-                            AddQuadBoth(v100, v001, v110, v011, ref myNumVerts6, ref myVerts6, ref myTriangles6);    // Along y
-                        }
-                        if (nIsSet000 == 0 && nIsSet110 == 0 && nIsSet001 == 0 && nIsSet111 == 0)
-                        {
-                            AddQuadBoth(v000, v110, v001, v111, ref myNumVerts7, ref myVerts7, ref myTriangles7);    // Along z
-                        }
-                        if (nIsSet100 == 0 && nIsSet010 == 0 && nIsSet101 == 0 && nIsSet011 == 0)
-                        {
-                            AddQuadBoth(v100, v010, v101, v011, ref myNumVerts8, ref myVerts8, ref myTriangles8);    // Along z
-                        }
+                        CheckQuads(nIsSet000, v000, nIsSet011, v011, nIsSet100, v100, nIsSet111, v111, ref myNumVerts3, ref myVerts3, ref myTriangles3);    // Along x
+                        CheckQuads(nIsSet010, v010, nIsSet001, v001, nIsSet110, v110, nIsSet101, v101, ref myNumVerts4, ref myVerts4, ref myTriangles4);    // Along x
+
+                        CheckQuads(nIsSet000, v000, nIsSet101, v101, nIsSet010, v010, nIsSet111, v111, ref myNumVerts5, ref myVerts5, ref myTriangles5);    // Along y
+                        CheckQuads(nIsSet100, v100, nIsSet001, v001, nIsSet110, v110, nIsSet011, v011, ref myNumVerts6, ref myVerts6, ref myTriangles6);    // Along y
+
+                        CheckQuads(nIsSet000, v000, nIsSet110, v110, nIsSet001, v001, nIsSet111, v111, ref myNumVerts7, ref myVerts7, ref myTriangles7);    // Along z
+                        CheckQuads(nIsSet100, v100, nIsSet010, v010, nIsSet101, v101, nIsSet011, v011, ref myNumVerts8, ref myVerts8, ref myTriangles8);    // Along z
+
 
                         // Flat faces
 
@@ -344,12 +329,13 @@ public class PlayerController : MonoBehaviour
                         CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet100, v100, nIsSet101, v101, ref myNumVerts1, ref myVerts1, ref myTriangles1);    // Along y = 0
                         CheckQuads(nIsSet000, v000, nIsSet010, v010, nIsSet100, v100, nIsSet110, v110, ref myNumVerts2, ref myVerts2, ref myTriangles2);    // Along z = 0
 
-                        /*
 
                         // Do cases of 3 "on" corners now!
 
                         // Corners
 
+                        //CheckTriangles(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, ref myNumVerts0, ref myVerts0, ref myTriangles0);    // Along x = 0
+/*
                         if (nIsSet001 == 0 && nIsSet010 == 0 && nIsSet100 == 0)
                         {
                             AddTriangleBoth(v001, v010, v100, ref myNumVerts9, ref myVerts9, ref myTriangles9);    // Around 000
@@ -437,6 +423,14 @@ public class PlayerController : MonoBehaviour
         if (in00 == 0 && in01 == 0 && in10 == 0 && in11 == 0)
         {
             AddQuadBoth(v00, v01, v10, v11, ref numVerts, ref verts, ref triangles);
+        }
+    }
+
+    public void CheckTriangle(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, ref int numVerts, ref List<Vector3> verts, ref List<int> triangles)
+    {
+        if (in00 == 0 && in01 == 0 && in10 == 0)
+        {
+            AddTriangleBoth(v00, v01, v10, ref numVerts, ref verts, ref triangles);
         }
     }
 
