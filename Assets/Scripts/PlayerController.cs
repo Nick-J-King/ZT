@@ -427,28 +427,14 @@ public class PlayerController : MonoBehaviour
                         CheckDiagonalFace(v001i, v100i, v110i, v011i, sliderFullInt, 6); // Along y
 
                         CheckDiagonalFace(v000i, v110i, v111i, v001i, sliderFullInt, 7); // Along z
-                        CheckDiagonalFace(v010i, v100i, v101i, v110i, sliderFullInt, 8); // Along z
+                        CheckDiagonalFace(v010i, v100i, v101i, v011i, sliderFullInt, 8); // Along z
 
-                        /*
-                                                CheckQuads(nIsSet000, v000, nIsSet011, v011, nIsSet100, v100, nIsSet111, v111, 3);    // Along x
-                                                CheckQuads(nIsSet010, v010, nIsSet001, v001, nIsSet110, v110, nIsSet101, v101, 4);    // Along x
 
-                                                CheckQuads(nIsSet000, v000, nIsSet101, v101, nIsSet010, v010, nIsSet111, v111, 5);    // Along y
-                                                CheckQuads(nIsSet100, v100, nIsSet001, v001, nIsSet110, v110, nIsSet011, v011, 6);    // Along y
-
-                                                CheckQuads(nIsSet000, v000, nIsSet110, v110, nIsSet001, v001, nIsSet111, v111, 7);    // Along z
-                                                CheckQuads(nIsSet100, v100, nIsSet010, v010, nIsSet101, v101, nIsSet011, v011, 8);    // Along z
-
-                        */
                         // Flat faces
 
-                        //CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet010, v010, nIsSet011, v011, 0);    // Along x = 0
-                        //CheckQuads(nIsSet000, v000, nIsSet001, v001, nIsSet100, v100, nIsSet101, v101, 1);    // Along y = 0
-                        //CheckQuads(nIsSet000, v000, nIsSet010, v010, nIsSet100, v100, nIsSet110, v110, 2);    // Along z = 0
-
                         CheckFlatFace(v000i, v010i, v011i, v001i, sliderFullInt, 0);    // Along x = 0
-                        CheckFlatFace(v000i, v001i, v101i, v100i, sliderFullInt, 0);    // Along y = 0
-                        CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 0);    // Along z = 0
+                        CheckFlatFace(v000i, v001i, v101i, v100i, sliderFullInt, 1);    // Along y = 0
+                        CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 2);    // Along z = 0
 
 
                         // Do cases of 3 "on" corners now!
@@ -576,6 +562,17 @@ public class PlayerController : MonoBehaviour
 
 
     // Check the "diagonal" rectangles of the cubic lattice.
+    /// <summary>
+    /// Checks the diagonal face.
+    /// >>> Still need to split finer.
+    /// >>> Then want to "merge" if possible / needed...
+    /// </summary>
+    /// <param name="v000">V000.</param>
+    /// <param name="v00C">V00 c.</param>
+    /// <param name="vCCC">V ccc.</param>
+    /// <param name="vCC0">V CC.</param>
+    /// <param name="edge4">Edge4.</param>
+    /// <param name="mesh">Mesh.</param>
     public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int edge4, int mesh)
     {
         // Get unit vectors in the square to navigate it.
