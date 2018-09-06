@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     public Text text4thEdge;
     public Slider slider4thEdge;
 
+    public Text textTitleLightAzimuthElevation;
     public Slider sliderLightAzimuth;
     public Slider sliderLightElevation;
 
@@ -135,6 +136,8 @@ public class PlayerController : MonoBehaviour
         float x = sliderLightElevation.value;
         float z = 0.0f;
 
+        textTitleLightAzimuthElevation.text = "Azm: " + y.ToString() + " Ele: " + x.ToString();
+
         directionalLight.transform.localRotation = Quaternion.Euler(x, y, z);
         directionalLight.transform.localPosition = Vector3.zero;
     }
@@ -191,6 +194,12 @@ public class PlayerController : MonoBehaviour
         return coord * size - sizeOnTwo;
     }
 
+
+    public void ResetAnimation()
+    {
+        toggleAnimate.isOn = false;
+        mfMain.transform.localEulerAngles = Vector3.zero;
+    }
 
     // We have the internal parameters set.
     // Now, compute the geometry of the figure.
@@ -277,7 +286,7 @@ public class PlayerController : MonoBehaviour
                         if (nIsSet110 == 0) nSet++;
                         if (nIsSet111 == 0) nSet++;
 
-                        if (nIsSet000 >= 0 && togglePoints.isOn)
+                        if (nIsSet000 == 0 && togglePoints.isOn)
                         {
                             s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                             s.transform.parent = mfMain.transform;
@@ -663,11 +672,16 @@ public class PlayerController : MonoBehaviour
 
     public int CanFormTriangle4(Vector3Int v, int e)
     {
-        //if (v.y  == v.z)
-        //    return 0;
-        //return -1;
+        int nResult = CanFormTriangle4Int(v.x, v.y, v.z, e);
 
-        return CanFormTriangle4Int(v.x, v.y, v.z, e);
+        if (nResult == 1)
+        {
+            if (v.x == 0 || v.x == nFullDivisions || v.y == 0 || v.y == nFullDivisions || v.z == 0 || v.z == nFullDivisions)
+            {
+                nResult = 0;
+            }
+        }
+        return nResult;
     }
 
 
