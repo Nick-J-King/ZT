@@ -16,8 +16,11 @@ public class PlayerController : MonoBehaviour
     public Text textDivisions;
     public Slider sliderDivisions;
 
+    public Dropdown DropdownEdges;
+
     public Text text4thEdge;
     public Slider slider4thEdge;
+    public Slider slider5thEdge;
 
     public Text textTitleLightAzimuthElevation;
     public Slider sliderLightAzimuth;
@@ -55,6 +58,9 @@ public class PlayerController : MonoBehaviour
     private float scale;
 
     private int sliderFullInt;
+    private int sliderFullInt5thEdge;
+
+    private int dropdownEdgesInt;
 
     // Mesh gameobjects.
     public GameObject mfMain;
@@ -179,10 +185,23 @@ public class PlayerController : MonoBehaviour
 
         textDivisions.text = "Divisions: " + nDivisions.ToString();
 
+        // Edges
+        if (dropdownEdgesInt != DropdownEdges.value)
+        {
+            dropdownEdgesInt = DropdownEdges.value;
+            changed = true;
+        }
+
         // 4th edge
         float sliderFloat = slider4thEdge.value;
         int sliderInt = (int)(sliderFloat * (nDivisions + 1));
         if (sliderInt > nDivisions) sliderInt = nDivisions;
+
+        // 5th edge
+        float sliderFloat5thEdge = slider5thEdge.value;
+        int sliderInt5thEdge = (int)(sliderFloat5thEdge * (nDivisions + 1));
+        if (sliderInt5thEdge > nDivisions) sliderInt5thEdge = nDivisions;
+
 
         text4thEdge.text = "4th edge: " + sliderInt.ToString();
 
@@ -206,6 +225,12 @@ public class PlayerController : MonoBehaviour
             sliderFullInt = sliderInt * 12;
             changed = true;
         }
+        if (sliderFullInt5thEdge != sliderInt5thEdge * 12)
+        {
+            sliderFullInt5thEdge = sliderInt5thEdge * 12;
+            changed = true;
+        }
+
         max = (float)nDivisions;
         fullMax = (float)nFullDivisions;
 
@@ -244,9 +269,9 @@ public class PlayerController : MonoBehaviour
         float y0;
         float z0;
 
-        float x8;
-        float y8;
-        float z8;
+        //float x8;
+        //float y8;
+        //float z8;
 
         for (int intX = 0; intX <= nDivisions; intX++)
         {
@@ -272,14 +297,14 @@ public class PlayerController : MonoBehaviour
 
                     //if (x > y && y > z)
                     {
-                        int nIsSet000 = CanFormTriangle4IntEx(intXfull, intYfull, intZfull, sliderFullInt);
-                        int nIsSet100 = CanFormTriangle4IntEx(intXfull + 12, intYfull, intZfull, sliderFullInt);
-                        int nIsSet010 = CanFormTriangle4IntEx(intXfull, intYfull + 12, intZfull, sliderFullInt);
-                        int nIsSet110 = CanFormTriangle4IntEx(intXfull + 12, intYfull + 12, intZfull, sliderFullInt);
-                        int nIsSet001 = CanFormTriangle4IntEx(intXfull, intYfull, intZfull + 12, sliderFullInt);
-                        int nIsSet101 = CanFormTriangle4IntEx(intXfull + 12, intYfull, intZfull + 12, sliderFullInt);
-                        int nIsSet011 = CanFormTriangle4IntEx(intXfull, intYfull + 12, intZfull + 12, sliderFullInt);
-                        int nIsSet111 = CanFormTriangle4IntEx(intXfull + 12, intYfull + 12, intZfull + 12, sliderFullInt);
+                        int nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
+                        int nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                        int nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                        int nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+                        int nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                        int nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                        int nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+                        int nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
 
                         // Don't bother if cube corners are all fully in or fully out.
                         if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
@@ -316,7 +341,7 @@ public class PlayerController : MonoBehaviour
                                                     if (nIsSet110 == 0) nSet++;
                                                     if (nIsSet111 == 0) nSet++;
                             */
-                            if (displayVertices && CanFormTriangle4Int(intXfull, intYfull, intZfull, sliderFullInt) == 0)
+                            if (displayVertices && CanFormTriangleEx(intXfull, intYfull, intZfull) == 0)
                             {
                                 s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                                 s.transform.parent = mfMain.transform;
@@ -330,36 +355,36 @@ public class PlayerController : MonoBehaviour
 
                             // Flat faces
 
-                            CheckFlatFace(v000i, v010i, v011i, v001i, sliderFullInt, 0);    // Along x = 0
-                            CheckFlatFace(v000i, v001i, v101i, v100i, sliderFullInt, 1);    // Along y = 0
-                            CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 2);    // Along z = 0
+                            CheckFlatFace(v000i, v010i, v011i, v001i, 0);    // Along x = 0
+                            CheckFlatFace(v000i, v001i, v101i, v100i, 1);    // Along y = 0
+                            CheckFlatFace(v000i, v100i, v110i, v010i, 2);    // Along z = 0
 
 
                             // Diagonals across faces
 
-                            CheckDiagonalFace(v000i, v100i, v111i, v011i, sliderFullInt, 3); // Along x
-                            CheckDiagonalFace(v010i, v110i, v101i, v001i, sliderFullInt, 4); // Along x
+                            CheckDiagonalFace(v000i, v100i, v111i, v011i, 3); // Along x
+                            CheckDiagonalFace(v010i, v110i, v101i, v001i, 4); // Along x
 
-                            CheckDiagonalFace(v000i, v010i, v111i, v101i, sliderFullInt, 5); // Along y
-                            CheckDiagonalFace(v001i, v011i, v110i, v100i, sliderFullInt, 6); // Along y
+                            CheckDiagonalFace(v000i, v010i, v111i, v101i, 5); // Along y
+                            CheckDiagonalFace(v001i, v011i, v110i, v100i, 6); // Along y
 
-                            CheckDiagonalFace(v000i, v001i, v111i, v110i, sliderFullInt, 7); // Along z
-                            CheckDiagonalFace(v010i, v011i, v101i, v100i, sliderFullInt, 8); // Along z
+                            CheckDiagonalFace(v000i, v001i, v111i, v110i, 7); // Along z
+                            CheckDiagonalFace(v010i, v011i, v101i, v100i, 8); // Along z
 
 
                             // Corners
 
-                            CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);   // Around 000
-                            CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);   // Around 111
+                            CheckCornerTriangle(v100i, v010i, v001i, 9);   // Around 000
+                            CheckCornerTriangle(v110i, v101i, v011i, 9);   // Around 111
 
-                            CheckCornerTriangle(v000i, v101i, v110i, sliderFullInt, 10);  // Around 100
-                            CheckCornerTriangle(v111i, v001i, v010i, sliderFullInt, 10);  // Around 011
+                            CheckCornerTriangle(v000i, v101i, v110i, 10);  // Around 100
+                            CheckCornerTriangle(v111i, v001i, v010i, 10);  // Around 011
 
-                            CheckCornerTriangle(v100i, v111i, v001i, sliderFullInt, 11);  // Around 101
-                            CheckCornerTriangle(v110i, v000i, v011i, sliderFullInt, 11);  // Around 010
+                            CheckCornerTriangle(v100i, v111i, v001i, 11);  // Around 101
+                            CheckCornerTriangle(v110i, v000i, v011i, 11);  // Around 010
 
-                            CheckCornerTriangle(v101i, v011i, v000i, sliderFullInt, 12);  // Around 001
-                            CheckCornerTriangle(v111i, v100i, v010i, sliderFullInt, 12);  // Around 110
+                            CheckCornerTriangle(v101i, v011i, v000i, 12);  // Around 001
+                            CheckCornerTriangle(v111i, v100i, v010i, 12);  // Around 110
                         }
                         else
                         {
@@ -462,7 +487,7 @@ public class PlayerController : MonoBehaviour
     // Check the "outer" faces of the cubic lattice.
     // Here, we assume the vertex vectors are in steps of 12.
     // This allows perfect integer arithmetic to determine "zero-triangularity".
-    public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int edge4, int mesh)
+    public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int mesh)
     {
         // Get unit vectors in the square to navigate it.
         Vector3Int vu00toC0 = new Vector3Int(((vC0.x - v00.x) / 12), ((vC0.y - v00.y) / 12), ((vC0.z - v00.z) / 12));   // Unit vector from v00 to vC0
@@ -478,16 +503,16 @@ public class PlayerController : MonoBehaviour
         Vector3Int v63 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 3);
 
         // Get the status of the points.
-        int in00 = CanFormTriangle4(v00, edge4);
-        int inC0 = CanFormTriangle4(vC0, edge4);
-        int in0C = CanFormTriangle4(v0C, edge4);
-        int inCC = CanFormTriangle4(vCC, edge4);
-        int in66 = CanFormTriangle4(v66, edge4);
+        int in00 = CanFormTriangle(v00);
+        int inC0 = CanFormTriangle(vC0);
+        int in0C = CanFormTriangle(v0C);
+        int inCC = CanFormTriangle(vCC);
+        int in66 = CanFormTriangle(v66);
 
-        int in36 = CanFormTriangle4(v36, edge4);
-        int in69 = CanFormTriangle4(v69, edge4);
-        int in96 = CanFormTriangle4(v96, edge4);
-        int in63 = CanFormTriangle4(v63, edge4);
+        int in36 = CanFormTriangle(v36);
+        int in69 = CanFormTriangle(v69);
+        int in96 = CanFormTriangle(v96);
+        int in63 = CanFormTriangle(v63);
 
         if (in36 == 0 && in69 == 0 && in96 == 0 && in63 == 0)
         {
@@ -508,7 +533,7 @@ public class PlayerController : MonoBehaviour
 
 
     // Check the "diagonal" rectangles of the cubic lattice.
-    public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int edge4, int mesh)
+    public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int mesh)
     {
         // Get unit vectors in the square to navigate it.
         Vector3Int vu000toCC0 = new Vector3Int(((vCC0.x - v000.x) / 12), ((vCC0.y - v000.y) / 12), ((vCC0.z - v000.z) / 12));   // Unit vector from v000 to vCC0
@@ -546,39 +571,39 @@ public class PlayerController : MonoBehaviour
         Vector3Int v88A = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 10);
 
         // Get the status of the points.
-        int in000 = CanFormTriangle4(v000, edge4);
-        int in660 = CanFormTriangle4(v660, edge4);
-        int inCC0 = CanFormTriangle4(vCC0, edge4);
-        int in666 = CanFormTriangle4(v666, edge4);
-        int in00C = CanFormTriangle4(v00C, edge4);
-        int in66C = CanFormTriangle4(v66C, edge4);
-        int inCCC = CanFormTriangle4(vCCC, edge4);
+        int in000 = CanFormTriangle(v000);
+        int in660 = CanFormTriangle(v660);
+        int inCC0 = CanFormTriangle(vCC0);
+        int in666 = CanFormTriangle(v666);
+        int in00C = CanFormTriangle(v00C);
+        int in66C = CanFormTriangle(v66C);
+        int inCCC = CanFormTriangle(vCCC);
 
-        int in336 = CanFormTriangle4(v336, edge4);
-        int in996 = CanFormTriangle4(v996, edge4);
-        int in444 = CanFormTriangle4(v444, edge4);
-        int in448 = CanFormTriangle4(v448, edge4);
-        int in884 = CanFormTriangle4(v884, edge4);
-        int in888 = CanFormTriangle4(v888, edge4);
+        int in336 = CanFormTriangle(v336);
+        int in996 = CanFormTriangle(v996);
+        int in444 = CanFormTriangle(v444);
+        int in448 = CanFormTriangle(v448);
+        int in884 = CanFormTriangle(v884);
+        int in888 = CanFormTriangle(v888);
 
 
-        int in442 = CanFormTriangle4(v442, edge4);
-        int in334 = CanFormTriangle4(v334, edge4);
-        int in226 = CanFormTriangle4(v226, edge4);
-        int in554 = CanFormTriangle4(v554, edge4);
-        int in446 = CanFormTriangle4(v446, edge4);
-        int in338 = CanFormTriangle4(v338, edge4);
-        int in558 = CanFormTriangle4(v558, edge4);
-        int in44A = CanFormTriangle4(v44A, edge4);
+        int in442 = CanFormTriangle(v442);
+        int in334 = CanFormTriangle(v334);
+        int in226 = CanFormTriangle(v226);
+        int in554 = CanFormTriangle(v554);
+        int in446 = CanFormTriangle(v446);
+        int in338 = CanFormTriangle(v338);
+        int in558 = CanFormTriangle(v558);
+        int in44A = CanFormTriangle(v44A);
 
-        int in882 = CanFormTriangle4(v882, edge4);
-        int in994 = CanFormTriangle4(v994, edge4);
-        int inAA6 = CanFormTriangle4(vAA6, edge4);
-        int in774 = CanFormTriangle4(v774, edge4);
-        int in886 = CanFormTriangle4(v886, edge4);
-        int in998 = CanFormTriangle4(v998, edge4);
-        int in778 = CanFormTriangle4(v778, edge4);
-        int in88A = CanFormTriangle4(v88A, edge4);
+        int in882 = CanFormTriangle(v882);
+        int in994 = CanFormTriangle(v994);
+        int inAA6 = CanFormTriangle(vAA6);
+        int in774 = CanFormTriangle(v774);
+        int in886 = CanFormTriangle(v886);
+        int in998 = CanFormTriangle(v998);
+        int in778 = CanFormTriangle(v778);
+        int in88A = CanFormTriangle(v88A);
 
         if (in442 == 0 && in334 == 0 && in226 == 0 && in554 == 0 && in446 == 0 && in338 == 0
             && in558 == 0 && in44A == 0 && in882 == 0 && in994 == 0 && inAA6 == 0 && in774 == 0
@@ -614,7 +639,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // Check the "corner" triangles of the cubic lattice.
-    public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int edge4, int mesh)
+    public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int mesh)
     {
         // Get unit vectors in the square to navigate it.
         Vector3Int vu00CtoC00 = new Vector3Int(((vC00.x - v00C.x) / 12), ((vC00.y - v00C.y) / 12), ((vC00.z - v00C.z) / 12));   // Unit vector from v00C to vC00 (x)
@@ -644,31 +669,31 @@ public class PlayerController : MonoBehaviour
         Vector3Int v534 = MixVectors3Int(v00C, vu00CtoC00, 5, vu00Cto0C0, 3);  // 11
 
         // Get the status of the points.
-        int in00C = CanFormTriangle4(v00C, edge4);
-        int in0C0 = CanFormTriangle4(v0C0, edge4);
-        int inC00 = CanFormTriangle4(vC00, edge4);
-        int in444 = CanFormTriangle4(v444, edge4);
+        int in00C = CanFormTriangle(v00C);
+        int in0C0 = CanFormTriangle(v0C0);
+        int inC00 = CanFormTriangle(vC00);
+        int in444 = CanFormTriangle(v444);
 
-        int in066 = CanFormTriangle4(v066, edge4);
-        int in363 = CanFormTriangle4(v363, edge4);
-        int in660 = CanFormTriangle4(v660, edge4);
-        int in336 = CanFormTriangle4(v336, edge4);
-        int in633 = CanFormTriangle4(v633, edge4);
-        int in606 = CanFormTriangle4(v606, edge4);
+        int in066 = CanFormTriangle(v066);
+        int in363 = CanFormTriangle(v363);
+        int in660 = CanFormTriangle(v660);
+        int in336 = CanFormTriangle(v336);
+        int in633 = CanFormTriangle(v633);
+        int in606 = CanFormTriangle(v606);
 
-        int in417 = CanFormTriangle4(v417, edge4);
-        int in147 = CanFormTriangle4(v147, edge4);
-        int in174 = CanFormTriangle4(v174, edge4);
-        int in471 = CanFormTriangle4(v471, edge4);
-        int in741 = CanFormTriangle4(v741, edge4);
-        int in714 = CanFormTriangle4(v714, edge4);
+        int in417 = CanFormTriangle(v417);
+        int in147 = CanFormTriangle(v147);
+        int in174 = CanFormTriangle(v174);
+        int in471 = CanFormTriangle(v471);
+        int in741 = CanFormTriangle(v741);
+        int in714 = CanFormTriangle(v714);
 
-        int in435 = CanFormTriangle4(v435, edge4);
-        int in345 = CanFormTriangle4(v345, edge4);
-        int in354 = CanFormTriangle4(v354, edge4);
-        int in453 = CanFormTriangle4(v453, edge4);
-        int in543 = CanFormTriangle4(v543, edge4);
-        int in534 = CanFormTriangle4(v534, edge4);
+        int in435 = CanFormTriangle(v435);
+        int in345 = CanFormTriangle(v345);
+        int in354 = CanFormTriangle(v354);
+        int in453 = CanFormTriangle(v453);
+        int in543 = CanFormTriangle(v543);
+        int in534 = CanFormTriangle(v534);
 
         if (in00C == 0 && in0C0 == 0 && inC00 == 0 && in444 == 0 && in066 == 0 && in363 == 0 && in660 == 0 && in336 == 0 && in633 == 0 && in606 == 0
             && in417 == 0 && in147 == 0 && in174 == 0 && in471 == 0 && in741 == 0 && in714 == 0 && in435 == 0 && in345 == 0 && in354 == 0 && in453 == 0 && in543 == 0 && in534 == 0)
@@ -757,25 +782,32 @@ public class PlayerController : MonoBehaviour
         myNumVerts[mesh] += 6;
     }
 
+    //-----------------------------------------------------
 
 
-    public int CanFormTriangle4(Vector3Int v, int e)
+    public int CanFormTriangle(Vector3Int v)
     {
-        int nResult = CanFormTriangle4Int(v.x, v.y, v.z, e);
+        int nResult = CanFormTriangleEx(v.x, v.y, v.z);
 
-        if (nResult == 1)
-        {
-            if (v.x == 0 || v.x == nFullDivisions || v.y == 0 || v.y == nFullDivisions || v.z == 0 || v.z == nFullDivisions)
-            {
-                nResult = 0;
-            }
-        }
         return nResult;
     }
 
-    public int CanFormTriangle4IntEx(int s1, int s2, int s3, int s4)
+
+    public int CanFormTriangleEx(int s1, int s2, int s3)
     {
-        int nResult = CanFormTriangle4Int(s1, s2, s3, s4);
+        int nResult;
+        if (dropdownEdgesInt == 2)
+        {
+            nResult = CanFormTriangle5Int(s1, s2, s3);
+        }
+        else if (dropdownEdgesInt == 1)
+        {
+            nResult = CanFormTriangle4Int(s1, s2, s3);
+        }
+        else
+        {
+            nResult = CanFormTriangle3Int(s1, s2, s3);
+        }
 
         if (nResult == 1)
         {
@@ -788,6 +820,10 @@ public class PlayerController : MonoBehaviour
     }
 
 
+
+    //-----------------------------------------------------
+
+
     // Given the 4 edges, return:
     //
     // +1   Can form a solid triangle.
@@ -795,8 +831,10 @@ public class PlayerController : MonoBehaviour
     // -1   Cannot form a triangle.
     // -2   An edge is out of bounds.
 
-    public int CanFormTriangle4Int(int s1, int s2, int s3, int s4)
+    public int CanFormTriangle4Int(int s1, int s2, int s3)
     {
+        int s4 = sliderFullInt;
+
         if (s1 < 0 || s1 > nFullDivisions) return -2;
         if (s2 < 0 || s2 > nFullDivisions) return -2;
         if (s3 < 0 || s3 > nFullDivisions) return -2;
@@ -820,6 +858,68 @@ public class PlayerController : MonoBehaviour
         return -1;
     }
 
+
+
+    //---------------
+
+
+    // Given the 5 edges, return:
+    //
+    // +1   Can form a solid triangle.
+    // 0    Can form a "zero triangle".
+    // -1   Cannot form a triangle.
+    // -2   An edge is out of bounds.
+
+    public int CanFormTriangle5Int(int s1, int s2, int s3)
+    {
+        int s4 = sliderFullInt;
+        int s5 = sliderFullInt5thEdge;
+
+        if (s1 < 0 || s1 > nFullDivisions) return -2;
+        if (s2 < 0 || s2 > nFullDivisions) return -2;
+        if (s3 < 0 || s3 > nFullDivisions) return -2;
+        if (s4 < 0 || s4 > nFullDivisions) return -2;
+        if (s5 < 0 || s5 > nFullDivisions) return -2;
+
+        int c1 =  CanFormTriangle3Int(s3, s4, s5);
+        int c2 =  CanFormTriangle3Int(s2, s4, s5);
+        int c3 =  CanFormTriangle3Int(s2, s3, s5);
+        int c4 =  CanFormTriangle3Int(s2, s3, s4);
+        int c5 =  CanFormTriangle3Int(s1, s4, s5);
+        int c6 =  CanFormTriangle3Int(s1, s3, s5);
+        int c7 =  CanFormTriangle3Int(s1, s3, s4);
+        int c8 =  CanFormTriangle3Int(s1, s2, s5);
+        int c9 =  CanFormTriangle3Int(s1, s2, s4);
+        int c10 = CanFormTriangle3Int(s1, s2, s3);
+
+
+        if (c1 == +1) return +1;
+        if (c2 == +1) return +1;
+        if (c3 == +1) return +1;
+        if (c4 == +1) return +1;
+        if (c5 == +1) return +1;
+        if (c6 == +1) return +1;
+        if (c7 == +1) return +1;
+        if (c8 == +1) return +1;
+        if (c9 == +1) return +1;
+        if (c10 == +1) return +1;
+
+        if (c1 == 0) return 0;
+        if (c2 == 0) return 0;
+        if (c3 == 0) return 0;
+        if (c4 == 0) return 0;
+        if (c5 == 0) return 0;
+        if (c6 == 0) return 0;
+        if (c7 == 0) return 0;
+        if (c8 == 0) return 0;
+        if (c9 == 0) return 0;
+        if (c10 == 0) return 0;
+
+        return -1;
+    }
+
+
+    //-----------------------------------------------------
 
     // Given 3 edges, return:
     //
