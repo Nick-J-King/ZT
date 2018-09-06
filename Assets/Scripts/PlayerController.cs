@@ -6,12 +6,12 @@ using System.Collections.Generic;
 // Player controller
 public class PlayerController : MonoBehaviour
 {
-
-    public Slider sliderDivisions;
+    // Controls on panel.
     public Text textDivisions;
+    public Slider sliderDivisions;
 
-    public Slider slider4thEdge;
     public Text text4thEdge;
+    public Slider slider4thEdge;
 
     public Slider sliderLightAzimuth;
     public Slider sliderLightElevation;
@@ -19,24 +19,34 @@ public class PlayerController : MonoBehaviour
     public Toggle togglePoints;
     public Slider sliderVertexSize;
 
-    public Light directionalLight;
-
     public Toggle toggleAnimate;
 
+    // External game objects.
+    public Light directionalLight;
+
+    // Internal cache for building meshes.
     public int [] myNumVerts;
     public int [] myNumTriangles;
     public List<Vector3> [] myVerts;
     public List<int> [] myTriangles;
 
+    // Internal parameters.
     private float size;
     private float sizeOnTwo;
-    private float scale;
 
     private int nDivisions;     // "Main" divisions.
-    private int nFullDivisions; // nDivisions * 8 for finers sub-divisions.
+    private int nFullDivisions; // nDivisions * 12 for finers sub-divisions.
+
+    float vertexSize;
+
     private float max;
     private float fullMax;
 
+    private float scale;
+
+    private int sliderFullInt;
+
+    // Mesh gameobjects.
     public GameObject mfMain;
 
     public MeshFilter[] mfSub;  // Point to the 14 "sub meshes"
@@ -56,34 +66,16 @@ public class PlayerController : MonoBehaviour
     public MeshFilter mfMain12;
     public MeshFilter mfMain13;
 
-    public int MAXTVERTS = 65530;
+    private int MAXTVERTS = 65530;
 
-
-    public Toggle toggleX;
-    public Toggle toggleY;
-    public Toggle toggleZ;
-    public Toggle toggleX1;
-    public Toggle toggleX2;
-    public Toggle toggleY1;
-    public Toggle toggleY2;
-    public Toggle toggleZ1;
-    public Toggle toggleZ2;
-    public Toggle toggle000;
-    public Toggle toggle001;
-    public Toggle toggle010;
-    public Toggle toggle011;
-    public Toggle toggle100;
-    public Toggle toggle101;
-    public Toggle toggle110;
-    public Toggle toggle111;
-
-
+    // List of vertex spheres.
     private GameObject s;
     private ArrayList myList;
 
 
     void Start()
     {
+        // Create the array of meshes.
         mfSub = new MeshFilter[14];
 
         mfSub[0] = mfMain0;
@@ -101,23 +93,22 @@ public class PlayerController : MonoBehaviour
         mfSub[12] = mfMain12;
         mfSub[13] = mfMain13;
 
+        // Create the builder info for each of the meshes.
         myNumVerts = new int[14];
         myNumTriangles = new int[14];
         myVerts = new List<Vector3>[14];
         myTriangles = new List<int>[14];
 
+        // Create the list of vertex spheres.
         myList = new ArrayList();
 
-
-        nDivisions = 50;                    // <<<
-        nFullDivisions = nDivisions * 12;    // <<<
-
-
+        // Set the basic size of the figure to match the cube frame.
         size = 10.0f;               // Size of the "configuration cube".
         sizeOnTwo = size / 2.0f;    // Used to center the cube.
 
-
-        CheckSliders();
+        GetParametersFromControls();
+        SetLightFromControls();
+        ComputeGeometry();
     }
 
 
@@ -137,6 +128,57 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    // Read the light controls, and update the directional light.
+    public void SetLightFromControls()
+    {
+        float y = 360.0f - sliderLightAzimuth.value;
+        float x = sliderLightElevation.value;
+        float z = 0.0f;
+
+        directionalLight.transform.localRotation = Quaternion.Euler(x, y, z);
+        directionalLight.transform.localPosition = Vector3.zero;
+    }
+
+
+    // A geometry control has changed.
+    // Get the new parameters, and recompute the geometry.
+    public void CheckGeometryControls()
+    {
+        GetParametersFromControls();
+        ComputeGeometry();
+    }
+
+
+    // Read the geometry parameters from the controls,
+    // and work out the internal parameters.
+    public void GetParametersFromControls()
+    {
+        // Lattice divisions.
+        nDivisions = (int)sliderDivisions.value;
+        nFullDivisions = nDivisions * 12;
+
+        textDivisions.text = "Divisions: " + nDivisions.ToString();
+
+        // 4th edge
+        float sliderFloat = slider4thEdge.value;
+        int sliderInt = (int)(sliderFloat * (nDivisions + 1));
+        if (sliderInt > nDivisions) sliderInt = nDivisions;
+
+        sliderFullInt = sliderInt * 12;
+
+        text4thEdge.text = "4th edge: " + sliderInt.ToString();
+
+        // Internal parameters.
+        vertexSize = sliderVertexSize.value;
+
+        max = (float)nDivisions;
+        fullMax = (float)nFullDivisions;
+
+        scale = size / max * vertexSize + 0.10f;
+    }
+
+
+    // Convert a full integer coord to a float from 0 to 1.
     private float intToFloat(int coord)
     {
         return (float)coord / fullMax;
@@ -150,178 +192,14 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    public void CheckLight()
+    // We have the internal parameters set.
+    // Now, compute the geometry of the figure.
+    public void ComputeGeometry()
     {
-        float y = 360.0f - sliderLightAzimuth.value;
-        float x = sliderLightElevation.value;
-        float z = 0.0f;
-
-        directionalLight.transform.localRotation = Quaternion.Euler(x, y, z);
-        directionalLight.transform.localPosition = Vector3.zero;
-    }
-
-
-    public void ResetMesh(int mesh)
-    {
-        myNumVerts[mesh] = 0;
-        myNumTriangles[mesh] = 0;
-        myVerts[mesh] = new List<Vector3>();
-        myTriangles[mesh] = new List<int>();
-        mfSub[mesh].mesh.Clear();
-    }
-
-    public void CheckSurfaceToggles()
-    {
-        CheckSliders();
-    }
-
-    public void CheckSlidersTest()
-    {
-
-        CheckLight();
-
         foreach (GameObject s in myList)
         {
             Destroy(s);
         }
-
-        nDivisions = (int)sliderDivisions.value;
-        nFullDivisions = nDivisions * 12;
-
-        textDivisions.text = "Max edge: " + nDivisions.ToString() + " (" + nFullDivisions.ToString() + ")";
-
-
-        float sliderFloat = slider4thEdge.value;
-        int sliderInt = (int)(sliderFloat * (nDivisions + 1));
-        if (sliderInt > nDivisions) sliderInt = nDivisions;
-        int sliderFullInt = sliderInt * 12;
-
-        text4thEdge.text = "4th edge: " + sliderInt.ToString() + " (" + sliderFullInt.ToString() + ")";    // + " " + sliderFloat.ToString();
-
-
-        float vertexSize = sliderVertexSize.value;
-
-
-        max = (float)nDivisions;
-        fullMax = (float)nFullDivisions;
-
-        scale = size / max * vertexSize + 0.06f;
-
-
-        float x0 = cubeToWorld(intToFloat(0));
-        float x1 = cubeToWorld(intToFloat(nFullDivisions));
-
-        float y0 = cubeToWorld(intToFloat(0));
-        float y1 = cubeToWorld(intToFloat(nFullDivisions));
-
-        float z0 = cubeToWorld(intToFloat(0));
-        float z1 = cubeToWorld(intToFloat(nFullDivisions));
-
-
-        Vector3 v000 = new Vector3(x0, y0, z0);
-        Vector3 v001 = new Vector3(x0, y0, z1);
-        Vector3 v010 = new Vector3(x0, y1, z0);
-        Vector3 v011 = new Vector3(x0, y1, z1);
-        Vector3 v100 = new Vector3(x1, y0, z0);
-        Vector3 v101 = new Vector3(x1, y0, z1);
-        Vector3 v110 = new Vector3(x1, y1, z0);
-        Vector3 v111 = new Vector3(x1, y1, z1);
-
-
-
-        if (togglePoints.isOn)
-        {
-            for (int x = 0; x <= nDivisions; x++)
-            {
-                float xx = cubeToWorld(intToFloat(x * 12));
-
-                for (int y = 0; y <= nDivisions; y++)
-                {
-                    float yy = cubeToWorld(intToFloat(y * 12));
-
-                    for (int z = 0; z <= nDivisions; z++)
-                    {
-                        float zz = cubeToWorld(intToFloat(z * 12));
-
-                        s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        s.transform.parent = mfMain.transform;
-
-                        s.transform.localPosition = new Vector3(xx, yy, zz);
-                        s.transform.localScale = new Vector3(scale, scale, scale);
-
-                        myList.Add(s);
-
-
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < 14; i++)
-        {
-            ResetMesh(i);
-        }
-
-        if (toggleX.isOn) AddQuadBoth(v000, v001, v010, v011, 1);
-        if (toggleY.isOn) AddQuadBoth(v000, v001, v100, v101, 1);
-        if (toggleZ.isOn) AddQuadBoth(v000, v010, v100, v110, 1);
-
-        if (toggleX1.isOn) AddQuadBoth(v000, v011, v100, v111, 1);
-        if (toggleX2.isOn) AddQuadBoth(v010, v001, v110, v101, 1);
-
-        if (toggleY1.isOn) AddQuadBoth(v000, v101, v010, v111, 1);
-        if (toggleY2.isOn) AddQuadBoth(v100, v001, v110, v011, 1);
-
-        if (toggleZ1.isOn) AddQuadBoth(v000, v110, v001, v111, 1);
-        if (toggleZ2.isOn) AddQuadBoth(v100, v010, v101, v011, 1);
-
-        if (toggle000.isOn) AddTriangleBoth(v001, v010, v100, 4);
-        if (toggle100.isOn) AddTriangleBoth(v000, v101, v110, 4);
-        if (toggle101.isOn) AddTriangleBoth(v100, v111, v001, 4);
-        if (toggle110.isOn) AddTriangleBoth(v111, v100, v010, 4);
-
-        if (toggle111.isOn) AddTriangleBoth(v110, v101, v011, 4);
-        if (toggle010.isOn) AddTriangleBoth(v110, v000, v011, 4);
-        if (toggle011.isOn) AddTriangleBoth(v111, v001, v010, 4);
-        if (toggle001.isOn) AddTriangleBoth(v101, v011, v000, 4);
-
-
-        for (int i = 0; i < 14; i++)
-        {
-            ProcessMesh(i);
-        }
-    }
-
-    public void CheckSliders()
-    {
-        CheckLight();
-
-        foreach (GameObject s in myList)
-        {
-            Destroy(s);
-        }
-
-        nDivisions = (int)sliderDivisions.value;
-        nFullDivisions = nDivisions * 12;
-
-        textDivisions.text = "Max edge: " + nDivisions.ToString() + " (" + nFullDivisions.ToString() + ")";
-
-
-        float sliderFloat = slider4thEdge.value;
-        int sliderInt = (int)(sliderFloat * (nDivisions + 1));
-        if (sliderInt > nDivisions) sliderInt = nDivisions;
-        int sliderFullInt = sliderInt * 12;
-
-        text4thEdge.text = "4th edge: " + sliderInt.ToString() + " (" + sliderFullInt.ToString() + ")";    // + " " + sliderFloat.ToString();
-
-
-        float vertexSize = sliderVertexSize.value;
-
-
-        max = (float)nDivisions;
-        fullMax = (float)nFullDivisions;
-
-        scale = size / max * vertexSize + 0.06f;
 
         for (int i = 0; i < 14; i++)
         {
@@ -399,7 +277,7 @@ public class PlayerController : MonoBehaviour
                         if (nIsSet110 == 0) nSet++;
                         if (nIsSet111 == 0) nSet++;
 
-                        if (nIsSet000 == 0 && togglePoints.isOn)
+                        if (nIsSet000 >= 0 && togglePoints.isOn)
                         {
                             s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                             s.transform.parent = mfMain.transform;
@@ -411,15 +289,8 @@ public class PlayerController : MonoBehaviour
                         }
 
 
-                        if (nSet > 4)
-                        {
-                            // Handle "hard cases"...
-                            // NOTE: Don't confuse the "clean" cases below with extraneous points on...
-                        }
-
-                        // Do cases of 4 "on" corners now!
-
                         // Diagonals across faces
+
                         CheckDiagonalFace(v000i, v100i, v111i, v011i, sliderFullInt, 3); // Along x
                         CheckDiagonalFace(v010i, v110i, v101i, v001i, sliderFullInt, 4); // Along x
 
@@ -437,28 +308,19 @@ public class PlayerController : MonoBehaviour
                         CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 2);    // Along z = 0
 
 
-                        // Do cases of 3 "on" corners now!
-
                         // Corners
-                        CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);  // Around 000
+
+                        CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);   // Around 000
                         CheckCornerTriangle(v000i, v101i, v110i, sliderFullInt, 10);  // Around 100
 
                         CheckCornerTriangle(v100i, v111i, v001i, sliderFullInt, 11);  // Around 101
                         CheckCornerTriangle(v111i, v100i, v010i, sliderFullInt, 12);  // Around 110
 
-                        CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);  // Around 111
+                        CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);   // Around 111
                         CheckCornerTriangle(v110i, v000i, v011i, sliderFullInt, 11);  // Around 010
 
                         CheckCornerTriangle(v111i, v001i, v010i, sliderFullInt, 10);  // Around 011
                         CheckCornerTriangle(v101i, v011i, v000i, sliderFullInt, 12);  // Around 001
-
-                        /*
-
-                        // Do cases of 2 "on" corners... ("edges")
-
-                        // Do cases of 1 "on" corners... ("vertices")
-                        */
-
                     }
                 }
             }
@@ -469,6 +331,16 @@ public class PlayerController : MonoBehaviour
         {
             ProcessMesh(i);
         }
+    }
+
+
+    public void ResetMesh(int mesh)
+    {
+        myNumVerts[mesh] = 0;
+        myNumTriangles[mesh] = 0;
+        myVerts[mesh] = new List<Vector3>();
+        myTriangles[mesh] = new List<int>();
+        mfSub[mesh].mesh.Clear();
     }
 
 
@@ -730,7 +602,7 @@ public class PlayerController : MonoBehaviour
 
     public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
-        ///if (myNumVerts > MAXTRIANGLES) return;
+        if (myNumVerts[mesh] > MAXTVERTS) return;
 
         myVerts[mesh].Add(v00);
         myVerts[mesh].Add(v10);
@@ -765,7 +637,7 @@ public class PlayerController : MonoBehaviour
 
     public void AddTriangleBoth(Vector3 v00, Vector3 v01, Vector3 v10, int mesh)
     {
-        //if (numVerts > MAXTRIANGLES) return;
+        if (myNumVerts[mesh] > MAXTVERTS) return;
 
         myVerts[mesh].Add(v00);
         myVerts[mesh].Add(v01);
@@ -799,6 +671,13 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    // Given the 4 edges, return:
+    //
+    // +1   Can form a solid triangle.
+    // 0    Can form a "zero triangle".
+    // -1   Cannot form a triangle.
+    // -2   An edge is out of bounds.
+
     public int CanFormTriangle4Int(int s1, int s2, int s3, int s4)
     {
         if (s1 < 0 || s1 > nFullDivisions) return -2;
@@ -824,6 +703,13 @@ public class PlayerController : MonoBehaviour
         return -1;
     }
 
+
+    // Given 3 edges, return:
+    //
+    // +1   Can form a solid triangle.
+    // 0    Can form a "zero triangle".
+    // -1   Cannot form a triangle.
+    // -2   An edge is out of bounds.
 
     public int CanFormTriangle3Int(int s1, int s2, int s3)
     {
