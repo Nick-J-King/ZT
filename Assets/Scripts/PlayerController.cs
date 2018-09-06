@@ -440,18 +440,17 @@ public class PlayerController : MonoBehaviour
                         // Do cases of 3 "on" corners now!
 
                         // Corners
-/*
-                        CheckTriangle(nIsSet001, v001, nIsSet010, v010, nIsSet100, v100, 9);      // Around 000
-                        CheckTriangle(nIsSet000, v000, nIsSet101, v101, nIsSet110, v110, 10);   // Around 100
-                        CheckTriangle(nIsSet100, v100, nIsSet111, v111, nIsSet001, v001, 11);   // Around 101
-                        CheckTriangle(nIsSet111, v111, nIsSet100, v100, nIsSet010, v010, 12);   // Around 110
+                        CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);  // Around 000
+                        CheckCornerTriangle(v000i, v101i, v110i, sliderFullInt, 10);  // Around 100
 
-                        CheckTriangle(nIsSet110, v110, nIsSet101, v101, nIsSet011, v011, 9);   // Around 111
-                        CheckTriangle(nIsSet110, v110, nIsSet000, v000, nIsSet011, v011, 11);   // Around 010
+                        CheckCornerTriangle(v100i, v111i, v001i, sliderFullInt, 11);  // Around 101
+                        CheckCornerTriangle(v111i, v100i, v010i, sliderFullInt, 12);  // Around 110
 
-                        CheckTriangle(nIsSet111, v111, nIsSet001, v001, nIsSet010, v010, 10);   // Around 011
-                        CheckTriangle(nIsSet101, v101, nIsSet011, v011, nIsSet000, v000, 12);   // Around 001
-*/
+                        CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);  // Around 111
+                        CheckCornerTriangle(v110i, v000i, v011i, sliderFullInt, 11);  // Around 010
+
+                        CheckCornerTriangle(v111i, v001i, v010i, sliderFullInt, 10);  // Around 011
+                        CheckCornerTriangle(v101i, v011i, v000i, sliderFullInt, 12);  // Around 001
 
                         /*
 
@@ -635,58 +634,100 @@ public class PlayerController : MonoBehaviour
         // Form triangles where possible.
         // The last test is for the "internal" point.
         // Go clockwise...
-        CheckPrimitiveTriangle(in000, v000, in444, v444, in660, v660, in442, mesh);     // 0
-        CheckPrimitiveTriangle(in000, v000, in336, v336, in444, v444, in334, mesh);     // 1
-        CheckPrimitiveTriangle(in000, v000, in00C, v00C, in336, v336, in226, mesh);     // 2
-        CheckPrimitiveTriangle(in660, v660, in444, v444, in666, v666, in554, mesh);     // 3
+        CheckPrimitiveTriangle(in000, v000, in444, v444, in660, v660, in442, mesh);             // 0
+        CheckPrimitiveTriangle(in000, v000, in336, v336, in444, v444, in334, mesh);             // 1
+        CheckPrimitiveTriangle(in000, v000, in00C, v00C, in336, v336, in226, mesh);             // 2
+        CheckPrimitiveTriangle(in660, v660, in444, v444, in666, v666, in554, mesh);             // 3
         CheckPrimitiveQuad(in448, v448, in666, v666, in444, v444, in336, v336, in446, mesh);    // 4
-        CheckPrimitiveTriangle(in00C, v00C, in448, v448, in336, v336, in338, mesh);     // 5
-        CheckPrimitiveTriangle(in66C, v66C, in666, v666, in448, v448, in558, mesh);     // 6
-        CheckPrimitiveTriangle(in00C, v00C, in66C, v66C, in448, v448, in44A, mesh);     // 7
+        CheckPrimitiveTriangle(in00C, v00C, in448, v448, in336, v336, in338, mesh);             // 5
+        CheckPrimitiveTriangle(in66C, v66C, in666, v666, in448, v448, in558, mesh);             // 6
+        CheckPrimitiveTriangle(in00C, v00C, in66C, v66C, in448, v448, in44A, mesh);             // 7
 
-        CheckPrimitiveTriangle(in660, v660, in884, v884, inCC0, vCC0, in882, mesh);     // 8
-        CheckPrimitiveTriangle(in884, v884, in996, v996, inCC0, vCC0, in994, mesh);     // 9
-        CheckPrimitiveTriangle(inCCC, vCCC, inCC0, vCC0, in996, v996, inAA6, mesh);     // 10
-        CheckPrimitiveTriangle(in660, v660, in666, v666, in884, v884, in774, mesh);     // 11
+        CheckPrimitiveTriangle(in660, v660, in884, v884, inCC0, vCC0, in882, mesh);             // 8
+        CheckPrimitiveTriangle(in884, v884, in996, v996, inCC0, vCC0, in994, mesh);             // 9
+        CheckPrimitiveTriangle(inCCC, vCCC, inCC0, vCC0, in996, v996, inAA6, mesh);             // 10
+        CheckPrimitiveTriangle(in660, v660, in666, v666, in884, v884, in774, mesh);             // 11
         CheckPrimitiveQuad(in666, v666, in888, v888, in996, v996, in884, v884, in886, mesh);    // 12
-        CheckPrimitiveTriangle(in888, v888, inCCC, vCCC, in996, v996, in998, mesh);     // 13
-        CheckPrimitiveTriangle(in666, v666, in66C, v66C, in888, v888, in778, mesh);     // 14
-        CheckPrimitiveTriangle(in66C, v66C, inCCC, vCCC, in888, v888, in88A, mesh);     // 15
+        CheckPrimitiveTriangle(in888, v888, inCCC, vCCC, in996, v996, in998, mesh);             // 13
+        CheckPrimitiveTriangle(in666, v666, in66C, v66C, in888, v888, in778, mesh);             // 14
+        CheckPrimitiveTriangle(in66C, v66C, inCCC, vCCC, in888, v888, in88A, mesh);             // 15
     }
 
 
     // Check the "corner" triangles of the cubic lattice.
-    public void CheckCornerTriangle()
+    public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int edge4, int mesh)
     {
+        // Get unit vectors in the square to navigate it.
+        Vector3Int vu00CtoC00 = new Vector3Int(((vC00.x - v00C.x) / 12), ((vC00.y - v00C.y) / 12), ((vC00.z - v00C.z) / 12));   // Unit vector from v00C to vC00 (x)
+        Vector3Int vu00Cto0C0 = new Vector3Int(((v0C0.x - v00C.x) / 12), ((v0C0.y - v00C.y) / 12), ((v0C0.z - v00C.z) / 12));   // Unit vector from v00C to v0C0 (y)
 
+        // Get the rest of the "points of interest".
+        Vector3Int v444 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 4);
+        Vector3Int v066 = MixVectors3Int(v00C, vu00CtoC00, 0, vu00Cto0C0, 6);
+        Vector3Int v363 = MixVectors3Int(v00C, vu00CtoC00, 3, vu00Cto0C0, 6);
+        Vector3Int v660 = MixVectors3Int(v00C, vu00CtoC00, 6, vu00Cto0C0, 6);
+        Vector3Int v336 = MixVectors3Int(v00C, vu00CtoC00, 3, vu00Cto0C0, 3);
+        Vector3Int v633 = MixVectors3Int(v00C, vu00CtoC00, 6, vu00Cto0C0, 3);
+        Vector3Int v606 = MixVectors3Int(v00C, vu00CtoC00, 6, vu00Cto0C0, 0);
+
+        // "Middle" points.
+        Vector3Int v417 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 1);  // 0
+        Vector3Int v147 = MixVectors3Int(v00C, vu00CtoC00, 1, vu00Cto0C0, 4);  // 1
+        Vector3Int v174 = MixVectors3Int(v00C, vu00CtoC00, 1, vu00Cto0C0, 7);  // 2
+        Vector3Int v471 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 7);  // 3
+        Vector3Int v741 = MixVectors3Int(v00C, vu00CtoC00, 7, vu00Cto0C0, 4);  // 4
+        Vector3Int v714 = MixVectors3Int(v00C, vu00CtoC00, 7, vu00Cto0C0, 1);  // 5
+        Vector3Int v435 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 3);  // 6
+        Vector3Int v345 = MixVectors3Int(v00C, vu00CtoC00, 3, vu00Cto0C0, 4);  // 7
+        Vector3Int v354 = MixVectors3Int(v00C, vu00CtoC00, 3, vu00Cto0C0, 5);  // 8
+        Vector3Int v453 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 5);  // 9
+        Vector3Int v543 = MixVectors3Int(v00C, vu00CtoC00, 5, vu00Cto0C0, 4);  // 10
+        Vector3Int v534 = MixVectors3Int(v00C, vu00CtoC00, 5, vu00Cto0C0, 3);  // 11
+
+        // Get the status of the points.
+        int in00C = CanFormTriangle4(v00C, edge4);
+        int in0C0 = CanFormTriangle4(v0C0, edge4);
+        int inC00 = CanFormTriangle4(vC00, edge4);
+        int in444 = CanFormTriangle4(v444, edge4);
+        int in066 = CanFormTriangle4(v066, edge4);
+        int in363 = CanFormTriangle4(v363, edge4);
+        int in660 = CanFormTriangle4(v660, edge4);
+        int in336 = CanFormTriangle4(v336, edge4);
+        int in633 = CanFormTriangle4(v633, edge4);
+        int in606 = CanFormTriangle4(v606, edge4);
+
+        int in417 = CanFormTriangle4(v417, edge4);
+        int in147 = CanFormTriangle4(v147, edge4);
+        int in174 = CanFormTriangle4(v174, edge4);
+        int in471 = CanFormTriangle4(v471, edge4);
+        int in741 = CanFormTriangle4(v741, edge4);
+        int in714 = CanFormTriangle4(v714, edge4);
+        int in435 = CanFormTriangle4(v435, edge4);
+        int in345 = CanFormTriangle4(v345, edge4);
+        int in354 = CanFormTriangle4(v354, edge4);
+        int in453 = CanFormTriangle4(v453, edge4);
+        int in543 = CanFormTriangle4(v543, edge4);
+        int in534 = CanFormTriangle4(v534, edge4);
+
+        // Form triangles where possible.
+        // The last test is for the "internal" point.
+        // Go clockwise...
+        CheckPrimitiveTriangle(in00C, v00C, in336, v336, in606, v606, in417, mesh);             // 0
+        CheckPrimitiveTriangle(in00C, v00C, in066, v066, in336, v336, in147, mesh);             // 1
+        CheckPrimitiveTriangle(in066, v066, in0C0, v0C0, in363, v363, in174, mesh);             // 2
+        CheckPrimitiveTriangle(in0C0, v0C0, in660, v660, in363, v363, in471, mesh);             // 3
+        CheckPrimitiveTriangle(in633, v633, in660, v660, inC00, vC00, in741, mesh);             // 4
+        CheckPrimitiveTriangle(in606, v606, in633, v633, inC00, vC00, in714, mesh);             // 5
+
+        CheckPrimitiveTriangle(in336, v336, in444, v444, in606, v606, in435, mesh);             // 6
+        CheckPrimitiveTriangle(in066, v066, in444, v444, in336, v336, in345, mesh);             // 7
+        CheckPrimitiveTriangle(in363, v363, in444, v444, in066, v066, in354, mesh);             // 8
+        CheckPrimitiveTriangle(in660, v660, in444, v444, in363, v363, in453, mesh);             // 9
+        CheckPrimitiveTriangle(in633, v633, in444, v444, in660, v660, in543, mesh);             // 10
+        CheckPrimitiveTriangle(in606, v606, in444, v444, in633, v633, in534, mesh);             // 11
     }
 
-    /*
 
-    public void CheckQuads(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int in11, Vector3 v11, int mesh)
-    {
-        if (in00 == 0 && in01 == 0 && in10 == 0 && in11 == 0)
-        {
-            AddQuadBoth(v00, v01, v10, v11, mesh);
-        }
-        else
-        {
-            CheckTriangle(in01, v01, in10, v10, in11, v11, mesh);
-            CheckTriangle(in00, v00, in10, v10, in11, v11, mesh);
-            CheckTriangle(in00, v00, in01, v01, in11, v11, mesh);
-            CheckTriangle(in00, v00, in01, v01, in10, v10, mesh);
-        }
-    }
-
-    public void CheckTriangle(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int mesh)
-    {
-        if (in00 == 0 && in01 == 0 && in10 == 0)
-        {
-            AddTriangleBoth(v00, v01, v10, mesh);
-        }
-    }
-
-*/
     public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
         ///if (myNumVerts > MAXTRIANGLES) return;
@@ -765,10 +806,10 @@ public class PlayerController : MonoBehaviour
         if (s3 < 0 || s3 > nFullDivisions) return -2;
         if (s4 < 0 || s4 > nFullDivisions) return -2;
 
-        int c1 = CanFormTriangleInt(s2, s3, s4);
-        int c2 = CanFormTriangleInt(s1, s3, s4);
-        int c3 = CanFormTriangleInt(s1, s2, s4);
-        int c4 = CanFormTriangleInt(s1, s2, s3);
+        int c1 = CanFormTriangle3Int(s2, s3, s4);
+        int c2 = CanFormTriangle3Int(s1, s3, s4);
+        int c3 = CanFormTriangle3Int(s1, s2, s4);
+        int c4 = CanFormTriangle3Int(s1, s2, s3);
 
         if (c1 == +1) return +1;
         if (c2 == +1) return +1;
@@ -784,7 +825,7 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    public int CanFormTriangleInt(int s1, int s2, int s3)
+    public int CanFormTriangle3Int(int s1, int s2, int s3)
     {
         if (s1 < 0 || s1 > nFullDivisions) return -2;
         if (s2 < 0 || s2 > nFullDivisions) return -2;
