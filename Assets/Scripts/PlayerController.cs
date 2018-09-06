@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour
 
     public Toggle toggleAnimate;
 
-
     public int [] myNumVerts;
     public int [] myNumTriangles;
     public List<Vector3> [] myVerts;
@@ -108,6 +107,7 @@ public class PlayerController : MonoBehaviour
         myTriangles = new List<int>[14];
 
         myList = new ArrayList();
+
 
         nDivisions = 50;                    // <<<
         nFullDivisions = nDivisions * 12;    // <<<
@@ -420,14 +420,14 @@ public class PlayerController : MonoBehaviour
                         // Do cases of 4 "on" corners now!
 
                         // Diagonals across faces
-                        CheckDiagonalFace(v000i, v011i, v111i, v100i, sliderFullInt, 3); // Along x
-                        CheckDiagonalFace(v010i, v001i, v101i, v110i, sliderFullInt, 4); // Along x
+                        CheckDiagonalFace(v000i, v100i, v111i, v011i, sliderFullInt, 3); // Along x
+                        CheckDiagonalFace(v010i, v110i, v101i, v001i, sliderFullInt, 4); // Along x
 
-                        CheckDiagonalFace(v000i, v101i, v111i, v010i, sliderFullInt, 5); // Along y
-                        CheckDiagonalFace(v001i, v100i, v110i, v011i, sliderFullInt, 6); // Along y
+                        CheckDiagonalFace(v000i, v010i, v111i, v101i, sliderFullInt, 5); // Along y
+                        CheckDiagonalFace(v001i, v011i, v110i, v100i, sliderFullInt, 6); // Along y
 
-                        CheckDiagonalFace(v000i, v110i, v111i, v001i, sliderFullInt, 7); // Along z
-                        CheckDiagonalFace(v010i, v100i, v101i, v011i, sliderFullInt, 8); // Along z
+                        CheckDiagonalFace(v000i, v001i, v111i, v110i, sliderFullInt, 7); // Along z
+                        CheckDiagonalFace(v010i, v011i, v101i, v100i, sliderFullInt, 8); // Along z
 
 
                         // Flat faces
@@ -460,19 +460,6 @@ public class PlayerController : MonoBehaviour
                         // Do cases of 1 "on" corners... ("vertices")
                         */
 
-                        //else
-                        {
-                            if (nSet >= 13)
-                            {
-                                AddQuadBoth(v000, v010, v001, v011, 13);    // x-
-                                AddQuadBoth(v000, v001, v100, v101, 13);    // y-
-                                AddQuadBoth(v000, v100, v010, v110, 13);    // z-
-
-                                AddQuadBoth(v100, v110, v101, v111, 13);    // x+
-                                AddQuadBoth(v010, v011, v110, v111, 13);    // y+
-                                AddQuadBoth(v001, v101, v011, v111, 13);    // z+
-                            }
-                        }
                     }
                 }
             }
@@ -515,6 +502,17 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    public void CheckPrimitiveTriangle(int in1, Vector3Int v1, int in2, Vector3Int v2, int in3, Vector3Int v3, int inMid, int mesh)
+    {
+        if (in1 == 0 && in2 == 0 && in3 == 0 && inMid == 0) AddTriangleBoth(IntVectorToWorld(v1), IntVectorToWorld(v2), IntVectorToWorld(v3), mesh);
+    }
+
+    public void CheckPrimitiveQuad(int in1, Vector3Int v1, int in2, Vector3Int v2, int in3, Vector3Int v3, int in4, Vector3Int v4, int inMid, int mesh)
+    {
+        if (in1 == 0 && in2 == 0 && in3 == 0 && in4 == 0 && inMid == 0) AddQuadBoth(IntVectorToWorld(v1), IntVectorToWorld(v2), IntVectorToWorld(v4), IntVectorToWorld(v3), mesh);
+    }
+
+
     //
     // "Generic" handlers for the shapes, and their internal "primative" triangles.
     //
@@ -554,25 +552,14 @@ public class PlayerController : MonoBehaviour
         // Form triangles where possible.
         // The last test is for the "internal" point.
         // Go clockwise...
-        if (in00 == 0 && in66 == 0 && inC0 == 0 && in63 == 0) AddTriangleBoth(IntVectorToWorld(v00), IntVectorToWorld(v66), IntVectorToWorld(vC0), mesh);
-        if (in00 == 0 && in0C == 0 && in66 == 0 && in36 == 0) AddTriangleBoth(IntVectorToWorld(v00), IntVectorToWorld(v0C), IntVectorToWorld(v66), mesh);
-        if (in0C == 0 && inCC == 0 && in66 == 0 && in69 == 0) AddTriangleBoth(IntVectorToWorld(v0C), IntVectorToWorld(vCC), IntVectorToWorld(v66), mesh);
-        if (inCC == 0 && inC0 == 0 && in66 == 0 && in96 == 0) AddTriangleBoth(IntVectorToWorld(vCC), IntVectorToWorld(vC0), IntVectorToWorld(v66), mesh);
+        CheckPrimitiveTriangle(in00, v00, in66, v66, inC0, vC0, in63, mesh);
+        CheckPrimitiveTriangle(in00, v00, in0C, v0C, in66, v66, in36, mesh);
+        CheckPrimitiveTriangle(in0C, v0C, inCC, vCC, in66, v66, in69, mesh);
+        CheckPrimitiveTriangle(inCC, vCC, inC0, vC0, in66, v66, in96, mesh);
     }
 
 
     // Check the "diagonal" rectangles of the cubic lattice.
-    /// <summary>
-    /// Checks the diagonal face.
-    /// >>> Still need to split finer.
-    /// >>> Then want to "merge" if possible / needed...
-    /// </summary>
-    /// <param name="v000">V000.</param>
-    /// <param name="v00C">V00 c.</param>
-    /// <param name="vCCC">V ccc.</param>
-    /// <param name="vCC0">V CC.</param>
-    /// <param name="edge4">Edge4.</param>
-    /// <param name="mesh">Mesh.</param>
     public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int edge4, int mesh)
     {
         // Get unit vectors in the square to navigate it.
@@ -585,13 +572,29 @@ public class PlayerController : MonoBehaviour
         Vector3Int v660 = MixVectors3Int(v000, vu000toCC0, 6, vu000to00C, 0);
         Vector3Int v66C = MixVectors3Int(v000, vu000toCC0, 6, vu000to00C, 12);
 
-        // "Middle" points.
+        Vector3Int v444 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 4);
         Vector3Int v336 = MixVectors3Int(v000, vu000toCC0, 3, vu000to00C, 6);
+        Vector3Int v448 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 8);
+        Vector3Int v884 = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 4);
         Vector3Int v996 = MixVectors3Int(v000, vu000toCC0, 9, vu000to00C, 6);
+        Vector3Int v888 = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 8);
 
+        // "Middle" points.
         Vector3Int v442 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 2);
+        Vector3Int v334 = MixVectors3Int(v000, vu000toCC0, 3, vu000to00C, 4);
+        Vector3Int v226 = MixVectors3Int(v000, vu000toCC0, 2, vu000to00C, 6);
+        Vector3Int v554 = MixVectors3Int(v000, vu000toCC0, 5, vu000to00C, 4);
+        Vector3Int v446 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 6);
+        Vector3Int v338 = MixVectors3Int(v000, vu000toCC0, 3, vu000to00C, 8);
+        Vector3Int v558 = MixVectors3Int(v000, vu000toCC0, 5, vu000to00C, 8);
         Vector3Int v44A = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 10);
         Vector3Int v882 = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 2);
+        Vector3Int v994 = MixVectors3Int(v000, vu000toCC0, 9, vu000to00C, 4);
+        Vector3Int vAA6 = MixVectors3Int(v000, vu000toCC0, 10, vu000to00C, 6);
+        Vector3Int v774 = MixVectors3Int(v000, vu000toCC0, 7, vu000to00C, 4);
+        Vector3Int v886 = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 6);
+        Vector3Int v998 = MixVectors3Int(v000, vu000toCC0, 9, vu000to00C, 8);
+        Vector3Int v778 = MixVectors3Int(v000, vu000toCC0, 7, vu000to00C, 8);
         Vector3Int v88A = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 10);
 
         // Get the status of the points.
@@ -605,20 +608,50 @@ public class PlayerController : MonoBehaviour
 
         int in336 = CanFormTriangle4(v336, edge4);
         int in996 = CanFormTriangle4(v996, edge4);
+        int in444 = CanFormTriangle4(v444, edge4);
+        int in448 = CanFormTriangle4(v448, edge4);
+        int in884 = CanFormTriangle4(v884, edge4);
+        int in888 = CanFormTriangle4(v888, edge4);
+
+
         int in442 = CanFormTriangle4(v442, edge4);
+        int in334 = CanFormTriangle4(v334, edge4);
+        int in226 = CanFormTriangle4(v226, edge4);
+        int in554 = CanFormTriangle4(v554, edge4);
+        int in446 = CanFormTriangle4(v446, edge4);
+        int in338 = CanFormTriangle4(v338, edge4);
+        int in558 = CanFormTriangle4(v558, edge4);
         int in44A = CanFormTriangle4(v44A, edge4);
+
         int in882 = CanFormTriangle4(v882, edge4);
+        int in994 = CanFormTriangle4(v994, edge4);
+        int inAA6 = CanFormTriangle4(vAA6, edge4);
+        int in774 = CanFormTriangle4(v774, edge4);
+        int in886 = CanFormTriangle4(v886, edge4);
+        int in998 = CanFormTriangle4(v998, edge4);
+        int in778 = CanFormTriangle4(v778, edge4);
         int in88A = CanFormTriangle4(v88A, edge4);
 
         // Form triangles where possible.
         // The last test is for the "internal" point.
         // Go clockwise...
-        if (in000 == 0 && in666 == 0 && in660 == 0 && in442 == 0) AddTriangleBoth(IntVectorToWorld(v000), IntVectorToWorld(v666), IntVectorToWorld(v660), mesh);
-        if (in000 == 0 && in00C == 0 && in666 == 0 && in336 == 0) AddTriangleBoth(IntVectorToWorld(v000), IntVectorToWorld(v00C), IntVectorToWorld(v666), mesh);
-        if (in00C == 0 && in66C == 0 && in666 == 0 && in44A == 0) AddTriangleBoth(IntVectorToWorld(v00C), IntVectorToWorld(v66C), IntVectorToWorld(v666), mesh);
-        if (in66C == 0 && inCCC == 0 && in666 == 0 && in88A == 0) AddTriangleBoth(IntVectorToWorld(v66C), IntVectorToWorld(vCCC), IntVectorToWorld(v666), mesh);
-        if (inCCC == 0 && inCC0 == 0 && in666 == 0 && in996 == 0) AddTriangleBoth(IntVectorToWorld(vCCC), IntVectorToWorld(vCC0), IntVectorToWorld(v666), mesh);
-        if (in660 == 0 && in666 == 0 && inCC0 == 0 && in882 == 0) AddTriangleBoth(IntVectorToWorld(v660), IntVectorToWorld(v666), IntVectorToWorld(vCC0), mesh);
+        CheckPrimitiveTriangle(in000, v000, in444, v444, in660, v660, in442, mesh);     // 0
+        CheckPrimitiveTriangle(in000, v000, in336, v336, in444, v444, in334, mesh);     // 1
+        CheckPrimitiveTriangle(in000, v000, in00C, v00C, in336, v336, in226, mesh);     // 2
+        CheckPrimitiveTriangle(in660, v660, in444, v444, in666, v666, in554, mesh);     // 3
+        CheckPrimitiveQuad(in448, v448, in666, v666, in444, v444, in336, v336, in446, mesh);    // 4
+        CheckPrimitiveTriangle(in00C, v00C, in448, v448, in336, v336, in338, mesh);     // 5
+        CheckPrimitiveTriangle(in66C, v66C, in666, v666, in448, v448, in558, mesh);     // 6
+        CheckPrimitiveTriangle(in00C, v00C, in66C, v66C, in448, v448, in44A, mesh);     // 7
+
+        CheckPrimitiveTriangle(in660, v660, in884, v884, inCC0, vCC0, in882, mesh);     // 8
+        CheckPrimitiveTriangle(in884, v884, in996, v996, inCC0, vCC0, in994, mesh);     // 9
+        CheckPrimitiveTriangle(inCCC, vCCC, inCC0, vCC0, in996, v996, inAA6, mesh);     // 10
+        CheckPrimitiveTriangle(in660, v660, in666, v666, in884, v884, in774, mesh);     // 11
+        CheckPrimitiveQuad(in666, v666, in888, v888, in996, v996, in884, v884, in886, mesh);    // 12
+        CheckPrimitiveTriangle(in888, v888, inCCC, vCCC, in996, v996, in998, mesh);     // 13
+        CheckPrimitiveTriangle(in666, v666, in66C, v66C, in888, v888, in778, mesh);     // 14
+        CheckPrimitiveTriangle(in66C, v66C, inCCC, vCCC, in888, v888, in88A, mesh);     // 15
     }
 
 
@@ -628,7 +661,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-
+    /*
 
     public void CheckQuads(int in00, Vector3 v00, int in01, Vector3 v01, int in10, Vector3 v10, int in11, Vector3 v11, int mesh)
     {
@@ -653,7 +686,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
+*/
     public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
         ///if (myNumVerts > MAXTRIANGLES) return;
@@ -717,7 +750,7 @@ public class PlayerController : MonoBehaviour
 
     public int CanFormTriangle4(Vector3Int v, int e)
     {
-        //if (v.z  >= 24)
+        //if (v.y  == v.z)
         //    return 0;
         //return -1;
 
