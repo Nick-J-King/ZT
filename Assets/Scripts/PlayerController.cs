@@ -6,6 +6,12 @@ using System.Collections.Generic;
 // Player controller
 public class PlayerController : MonoBehaviour
 {
+
+    public int nFullFlats;
+    public int nFullDiagonals;
+    public int nFullCorners;
+    public int nFullyInOrOut;
+
     // Controls on panel.
     public Text textDivisions;
     public Slider sliderDivisions;
@@ -21,6 +27,8 @@ public class PlayerController : MonoBehaviour
     public Slider sliderVertexSize;
 
     public Toggle toggleAnimate;
+
+    public Text TextStatus;
 
     // External game objects.
     public Light directionalLight;
@@ -38,6 +46,7 @@ public class PlayerController : MonoBehaviour
     private int nDivisions;     // "Main" divisions.
     private int nFullDivisions; // nDivisions * 12 for finers sub-divisions.
 
+    bool displayVertices;
     float vertexSize;
 
     private float max;
@@ -147,18 +156,26 @@ public class PlayerController : MonoBehaviour
     // Get the new parameters, and recompute the geometry.
     public void CheckGeometryControls()
     {
-        GetParametersFromControls();
-        ComputeGeometry();
+        bool changed = GetParametersFromControls();
+        if (changed)
+        {
+            ComputeGeometry();
+        }
     }
 
 
     // Read the geometry parameters from the controls,
     // and work out the internal parameters.
-    public void GetParametersFromControls()
+    public bool GetParametersFromControls()
     {
+        bool changed = false;
+
         // Lattice divisions.
-        nDivisions = (int)sliderDivisions.value;
-        nFullDivisions = nDivisions * 12;
+        if (nDivisions != (int)sliderDivisions.value)
+        {
+            nDivisions = (int)sliderDivisions.value;
+            changed = true;
+        }
 
         textDivisions.text = "Divisions: " + nDivisions.ToString();
 
@@ -167,31 +184,34 @@ public class PlayerController : MonoBehaviour
         int sliderInt = (int)(sliderFloat * (nDivisions + 1));
         if (sliderInt > nDivisions) sliderInt = nDivisions;
 
-        sliderFullInt = sliderInt * 12;
-
         text4thEdge.text = "4th edge: " + sliderInt.ToString();
 
-        // Internal parameters.
-        vertexSize = sliderVertexSize.value;
+        // Vertices
+        if (displayVertices != togglePoints.isOn)
+        {
+            displayVertices = togglePoints.isOn;
+            changed = true;
+        }
 
+        if (vertexSize != sliderVertexSize.value)
+        {
+            vertexSize = sliderVertexSize.value;
+            changed = true;
+        }
+
+        // Internal parameters.
+        nFullDivisions = nDivisions * 12;
+        if (sliderFullInt != sliderInt * 12)
+        {
+            sliderFullInt = sliderInt * 12;
+            changed = true;
+        }
         max = (float)nDivisions;
         fullMax = (float)nFullDivisions;
 
         scale = size / max * vertexSize + 0.10f;
-    }
 
-
-    // Convert a full integer coord to a float from 0 to 1.
-    private float intToFloat(int coord)
-    {
-        return (float)coord / fullMax;
-    }
-
-
-    // Convert float coord (0 - 1) into world coordinate.
-    private float cubeToWorld(float coord)
-    {
-        return coord * size - sizeOnTwo;
+        return changed;
     }
 
 
@@ -205,6 +225,11 @@ public class PlayerController : MonoBehaviour
     // Now, compute the geometry of the figure.
     public void ComputeGeometry()
     {
+        nFullFlats = 0;
+        nFullDiagonals = 0;
+        nFullCorners = 0;
+        nFullyInOrOut = 0;
+
         foreach (GameObject s in myList)
         {
             Destroy(s);
@@ -227,119 +252,132 @@ public class PlayerController : MonoBehaviour
         {
             int intXfull = intX * 12;
 
-            x0 = cubeToWorld(intToFloat(intXfull));
-            x8 = cubeToWorld(intToFloat(intXfull + 12));
+            x0 = GridToWorld(intXfull);
+            //x8 = cubeToWorld(intToFloat(intXfull + 12));
 
             for (int intY = 0; intY <= nDivisions; intY++)
             {
                 int intYfull = intY * 12;
 
-                y0 = cubeToWorld(intToFloat(intYfull));
-                y8 = cubeToWorld(intToFloat(intYfull + 12));
+                y0 = GridToWorld(intYfull);
+                //y8 = cubeToWorld(intToFloat(intYfull + 12));
 
                 for (int intZ = 0; intZ <= nDivisions; intZ++)
                 {
                     int intZfull = intZ * 12;
 
-                    z0 = cubeToWorld(intToFloat(intZfull));
-                    z8 = cubeToWorld(intToFloat(intZfull + 12));
+                    z0 = GridToWorld(intZfull);
+                    //z8 = cubeToWorld(intToFloat(intZfull + 12));
 
 
                     //if (x > y && y > z)
                     {
-                        int nIsSet000 = CanFormTriangle4Int(intXfull, intYfull, intZfull, sliderFullInt);
-                        int nIsSet100 = CanFormTriangle4Int(intXfull + 12, intYfull, intZfull, sliderFullInt);
-                        int nIsSet010 = CanFormTriangle4Int(intXfull, intYfull + 12, intZfull, sliderFullInt);
-                        int nIsSet110 = CanFormTriangle4Int(intXfull + 12, intYfull + 12, intZfull, sliderFullInt);
-                        int nIsSet001 = CanFormTriangle4Int(intXfull, intYfull, intZfull + 12, sliderFullInt);
-                        int nIsSet101 = CanFormTriangle4Int(intXfull + 12, intYfull, intZfull + 12, sliderFullInt);
-                        int nIsSet011 = CanFormTriangle4Int(intXfull, intYfull + 12, intZfull + 12, sliderFullInt);
-                        int nIsSet111 = CanFormTriangle4Int(intXfull + 12, intYfull + 12, intZfull + 12, sliderFullInt);
+                        int nIsSet000 = CanFormTriangle4IntEx(intXfull, intYfull, intZfull, sliderFullInt);
+                        int nIsSet100 = CanFormTriangle4IntEx(intXfull + 12, intYfull, intZfull, sliderFullInt);
+                        int nIsSet010 = CanFormTriangle4IntEx(intXfull, intYfull + 12, intZfull, sliderFullInt);
+                        int nIsSet110 = CanFormTriangle4IntEx(intXfull + 12, intYfull + 12, intZfull, sliderFullInt);
+                        int nIsSet001 = CanFormTriangle4IntEx(intXfull, intYfull, intZfull + 12, sliderFullInt);
+                        int nIsSet101 = CanFormTriangle4IntEx(intXfull + 12, intYfull, intZfull + 12, sliderFullInt);
+                        int nIsSet011 = CanFormTriangle4IntEx(intXfull, intYfull + 12, intZfull + 12, sliderFullInt);
+                        int nIsSet111 = CanFormTriangle4IntEx(intXfull + 12, intYfull + 12, intZfull + 12, sliderFullInt);
 
-                        Vector3 v000 = new Vector3(x0, y0, z0);
-                        Vector3 v100 = new Vector3(x8, y0, z0);
-                        Vector3 v010 = new Vector3(x0, y8, z0);
-                        Vector3 v110 = new Vector3(x8, y8, z0);
-                        Vector3 v001 = new Vector3(x0, y0, z8);
-                        Vector3 v101 = new Vector3(x8, y0, z8);
-                        Vector3 v011 = new Vector3(x0, y8, z8);
-                        Vector3 v111 = new Vector3(x8, y8, z8);
-
-                        Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
-                        Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
-                        Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
-                        Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
-                        Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
-                        Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
-                        Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
-                        Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
-                        // f
-                        //
-                        //
-                        int nSet = 0;
-                        if (nIsSet000 == 0) nSet++;
-                        if (nIsSet001 == 0) nSet++;
-                        if (nIsSet010 == 0) nSet++;
-                        if (nIsSet011 == 0) nSet++;
-                        if (nIsSet100 == 0) nSet++;
-                        if (nIsSet101 == 0) nSet++;
-                        if (nIsSet110 == 0) nSet++;
-                        if (nIsSet111 == 0) nSet++;
-
-                        if (nIsSet000 == 0 && togglePoints.isOn)
+                        // Don't bother if cube corners are all fully in or fully out.
+                        if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
                         {
-                            s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                            s.transform.parent = mfMain.transform;
+                            /*
+                                                    Vector3 v000 = new Vector3(x0, y0, z0);
+                                                    Vector3 v100 = new Vector3(x8, y0, z0);
+                                                    Vector3 v010 = new Vector3(x0, y8, z0);
+                                                    Vector3 v110 = new Vector3(x8, y8, z0);
+                                                    Vector3 v001 = new Vector3(x0, y0, z8);
+                                                    Vector3 v101 = new Vector3(x8, y0, z8);
+                                                    Vector3 v011 = new Vector3(x0, y8, z8);
+                                                    Vector3 v111 = new Vector3(x8, y8, z8);
+                            */
+                            Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
+                            Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
+                            Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
+                            Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
+                            Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
+                            Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
+                            Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
+                            Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
 
-                            s.transform.localPosition = v000;
-                            s.transform.localScale = new Vector3(scale, scale, scale);
+                            //
+                            //
+                            /*
+                                                    int nSet = 0;
+                                                    if (nIsSet000 == 0) nSet++;
+                                                    if (nIsSet001 == 0) nSet++;
+                                                    if (nIsSet010 == 0) nSet++;
+                                                    if (nIsSet011 == 0) nSet++;
+                                                    if (nIsSet100 == 0) nSet++;
+                                                    if (nIsSet101 == 0) nSet++;
+                                                    if (nIsSet110 == 0) nSet++;
+                                                    if (nIsSet111 == 0) nSet++;
+                            */
+                            if (displayVertices && CanFormTriangle4Int(intXfull, intYfull, intZfull, sliderFullInt) == 0)
+                            {
+                                s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                                s.transform.parent = mfMain.transform;
 
-                            myList.Add(s);
+                                s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
+                                s.transform.localScale = new Vector3(scale, scale, scale);
+
+                                myList.Add(s);
+                            }
+
+
+                            // Flat faces
+
+                            CheckFlatFace(v000i, v010i, v011i, v001i, sliderFullInt, 0);    // Along x = 0
+                            CheckFlatFace(v000i, v001i, v101i, v100i, sliderFullInt, 1);    // Along y = 0
+                            CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 2);    // Along z = 0
+
+
+                            // Diagonals across faces
+
+                            CheckDiagonalFace(v000i, v100i, v111i, v011i, sliderFullInt, 3); // Along x
+                            CheckDiagonalFace(v010i, v110i, v101i, v001i, sliderFullInt, 4); // Along x
+
+                            CheckDiagonalFace(v000i, v010i, v111i, v101i, sliderFullInt, 5); // Along y
+                            CheckDiagonalFace(v001i, v011i, v110i, v100i, sliderFullInt, 6); // Along y
+
+                            CheckDiagonalFace(v000i, v001i, v111i, v110i, sliderFullInt, 7); // Along z
+                            CheckDiagonalFace(v010i, v011i, v101i, v100i, sliderFullInt, 8); // Along z
+
+
+                            // Corners
+
+                            CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);   // Around 000
+                            CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);   // Around 111
+
+                            CheckCornerTriangle(v000i, v101i, v110i, sliderFullInt, 10);  // Around 100
+                            CheckCornerTriangle(v111i, v001i, v010i, sliderFullInt, 10);  // Around 011
+
+                            CheckCornerTriangle(v100i, v111i, v001i, sliderFullInt, 11);  // Around 101
+                            CheckCornerTriangle(v110i, v000i, v011i, sliderFullInt, 11);  // Around 010
+
+                            CheckCornerTriangle(v101i, v011i, v000i, sliderFullInt, 12);  // Around 001
+                            CheckCornerTriangle(v111i, v100i, v010i, sliderFullInt, 12);  // Around 110
                         }
-
-
-                        // Diagonals across faces
-
-                        CheckDiagonalFace(v000i, v100i, v111i, v011i, sliderFullInt, 3); // Along x
-                        CheckDiagonalFace(v010i, v110i, v101i, v001i, sliderFullInt, 4); // Along x
-
-                        CheckDiagonalFace(v000i, v010i, v111i, v101i, sliderFullInt, 5); // Along y
-                        CheckDiagonalFace(v001i, v011i, v110i, v100i, sliderFullInt, 6); // Along y
-
-                        CheckDiagonalFace(v000i, v001i, v111i, v110i, sliderFullInt, 7); // Along z
-                        CheckDiagonalFace(v010i, v011i, v101i, v100i, sliderFullInt, 8); // Along z
-
-
-                        // Flat faces
-
-                        CheckFlatFace(v000i, v010i, v011i, v001i, sliderFullInt, 0);    // Along x = 0
-                        CheckFlatFace(v000i, v001i, v101i, v100i, sliderFullInt, 1);    // Along y = 0
-                        CheckFlatFace(v000i, v100i, v110i, v010i, sliderFullInt, 2);    // Along z = 0
-
-
-                        // Corners
-
-                        CheckCornerTriangle(v100i, v010i, v001i, sliderFullInt, 9);   // Around 000
-                        CheckCornerTriangle(v000i, v101i, v110i, sliderFullInt, 10);  // Around 100
-
-                        CheckCornerTriangle(v100i, v111i, v001i, sliderFullInt, 11);  // Around 101
-                        CheckCornerTriangle(v111i, v100i, v010i, sliderFullInt, 12);  // Around 110
-
-                        CheckCornerTriangle(v110i, v101i, v011i, sliderFullInt, 9);   // Around 111
-                        CheckCornerTriangle(v110i, v000i, v011i, sliderFullInt, 11);  // Around 010
-
-                        CheckCornerTriangle(v111i, v001i, v010i, sliderFullInt, 10);  // Around 011
-                        CheckCornerTriangle(v101i, v011i, v000i, sliderFullInt, 12);  // Around 001
+                        else
+                        {
+                            nFullyInOrOut++;
+                        }
                     }
                 }
             }
         }
 
-        //
+        // Now put the list of triangles in each mesh.
         for (int i = 0; i < 14; i++)
         {
             ProcessMesh(i);
         }
+
+        TextStatus.text = "F: " + nFullFlats.ToString() + " D:" + nFullDiagonals.ToString() + " C:" + nFullCorners.ToString() + " IO:" + nFullyInOrOut.ToString();
+
     }
 
 
@@ -366,6 +404,26 @@ public class PlayerController : MonoBehaviour
     // Utils for vectors
     //
 
+    // Convert a full integer coord to a float from 0 to 1.
+    private float IntToFloat(int coord)
+    {
+        return (float)coord / fullMax;
+    }
+
+
+    // Convert float coord (0 - 1) into world coordinate.
+    private float CubeToWorld(float coord)
+    {
+        return coord * size - sizeOnTwo;
+    }
+
+
+    private float GridToWorld(int coord)
+    {
+        return ((float)coord / fullMax) * size - sizeOnTwo;
+    }
+
+
     public Vector3Int MixVectors3Int(Vector3Int baseVector, Vector3Int dir1, int mag1, Vector3Int dir2, int mag2)
     {
 
@@ -374,9 +432,10 @@ public class PlayerController : MonoBehaviour
         return result;
     }
 
+
     public Vector3 IntVectorToWorld(Vector3Int intVector)
     {
-        Vector3 result = new Vector3(cubeToWorld(intToFloat(intVector.x)), cubeToWorld(intToFloat(intVector.y)), cubeToWorld(intToFloat(intVector.z)));
+        Vector3 result = new Vector3(GridToWorld(intVector.x), GridToWorld(intVector.y), GridToWorld(intVector.z));
 
         return result;
     }
@@ -386,6 +445,7 @@ public class PlayerController : MonoBehaviour
     {
         if (in1 == 0 && in2 == 0 && in3 == 0 && inMid == 0) AddTriangleBoth(IntVectorToWorld(v1), IntVectorToWorld(v2), IntVectorToWorld(v3), mesh);
     }
+
 
     public void CheckPrimitiveQuad(int in1, Vector3Int v1, int in2, Vector3Int v2, int in3, Vector3Int v3, int in4, Vector3Int v4, int inMid, int mesh)
     {
@@ -429,13 +489,21 @@ public class PlayerController : MonoBehaviour
         int in96 = CanFormTriangle4(v96, edge4);
         int in63 = CanFormTriangle4(v63, edge4);
 
-        // Form triangles where possible.
-        // The last test is for the "internal" point.
-        // Go clockwise...
-        CheckPrimitiveTriangle(in00, v00, in66, v66, inC0, vC0, in63, mesh);
-        CheckPrimitiveTriangle(in00, v00, in0C, v0C, in66, v66, in36, mesh);
-        CheckPrimitiveTriangle(in0C, v0C, inCC, vCC, in66, v66, in69, mesh);
-        CheckPrimitiveTriangle(inCC, vCC, inC0, vC0, in66, v66, in96, mesh);
+        if (in36 == 0 && in69 == 0 && in96 == 0 && in63 == 0)
+        {
+            AddQuadBoth(IntVectorToWorld(v00), IntVectorToWorld(v0C), IntVectorToWorld(vC0), IntVectorToWorld(vCC), mesh);
+            nFullFlats++;
+        }
+        else
+        {
+            // Form triangles where possible.
+            // The last test is for the "internal" point.
+            // Go clockwise...
+            CheckPrimitiveTriangle(in00, v00, in66, v66, inC0, vC0, in63, mesh);
+            CheckPrimitiveTriangle(in00, v00, in0C, v0C, in66, v66, in36, mesh);
+            CheckPrimitiveTriangle(in0C, v0C, inCC, vCC, in66, v66, in69, mesh);
+            CheckPrimitiveTriangle(inCC, vCC, inC0, vC0, in66, v66, in96, mesh);
+        }
     }
 
 
@@ -512,28 +580,38 @@ public class PlayerController : MonoBehaviour
         int in778 = CanFormTriangle4(v778, edge4);
         int in88A = CanFormTriangle4(v88A, edge4);
 
-        // Form triangles where possible.
-        // The last test is for the "internal" point.
-        // Go clockwise...
-        CheckPrimitiveTriangle(in000, v000, in444, v444, in660, v660, in442, mesh);             // 0
-        CheckPrimitiveTriangle(in000, v000, in336, v336, in444, v444, in334, mesh);             // 1
-        CheckPrimitiveTriangle(in000, v000, in00C, v00C, in336, v336, in226, mesh);             // 2
-        CheckPrimitiveTriangle(in660, v660, in444, v444, in666, v666, in554, mesh);             // 3
-        CheckPrimitiveQuad(in448, v448, in666, v666, in444, v444, in336, v336, in446, mesh);    // 4
-        CheckPrimitiveTriangle(in00C, v00C, in448, v448, in336, v336, in338, mesh);             // 5
-        CheckPrimitiveTriangle(in66C, v66C, in666, v666, in448, v448, in558, mesh);             // 6
-        CheckPrimitiveTriangle(in00C, v00C, in66C, v66C, in448, v448, in44A, mesh);             // 7
+        if (in442 == 0 && in334 == 0 && in226 == 0 && in554 == 0 && in446 == 0 && in338 == 0
+            && in558 == 0 && in44A == 0 && in882 == 0 && in994 == 0 && inAA6 == 0 && in774 == 0
+            && in886 == 0 && in998 == 0 && in778 == 0 && in88A == 0)
+        {
+            AddQuadBoth(IntVectorToWorld(v000), IntVectorToWorld(v00C), IntVectorToWorld(vCC0), IntVectorToWorld(vCCC), mesh);
+            nFullDiagonals++;
+        }
+        else
+        {
 
-        CheckPrimitiveTriangle(in660, v660, in884, v884, inCC0, vCC0, in882, mesh);             // 8
-        CheckPrimitiveTriangle(in884, v884, in996, v996, inCC0, vCC0, in994, mesh);             // 9
-        CheckPrimitiveTriangle(inCCC, vCCC, inCC0, vCC0, in996, v996, inAA6, mesh);             // 10
-        CheckPrimitiveTriangle(in660, v660, in666, v666, in884, v884, in774, mesh);             // 11
-        CheckPrimitiveQuad(in666, v666, in888, v888, in996, v996, in884, v884, in886, mesh);    // 12
-        CheckPrimitiveTriangle(in888, v888, inCCC, vCCC, in996, v996, in998, mesh);             // 13
-        CheckPrimitiveTriangle(in666, v666, in66C, v66C, in888, v888, in778, mesh);             // 14
-        CheckPrimitiveTriangle(in66C, v66C, inCCC, vCCC, in888, v888, in88A, mesh);             // 15
+            // Form triangles where possible.
+            // The last test is for the "internal" point.
+            // Go clockwise...
+            CheckPrimitiveTriangle(in000, v000, in444, v444, in660, v660, in442, mesh);             // 0
+            CheckPrimitiveTriangle(in000, v000, in336, v336, in444, v444, in334, mesh);             // 1
+            CheckPrimitiveTriangle(in000, v000, in00C, v00C, in336, v336, in226, mesh);             // 2
+            CheckPrimitiveTriangle(in660, v660, in444, v444, in666, v666, in554, mesh);             // 3
+            CheckPrimitiveQuad(in448, v448, in666, v666, in444, v444, in336, v336, in446, mesh);    // 4
+            CheckPrimitiveTriangle(in00C, v00C, in448, v448, in336, v336, in338, mesh);             // 5
+            CheckPrimitiveTriangle(in66C, v66C, in666, v666, in448, v448, in558, mesh);             // 6
+            CheckPrimitiveTriangle(in00C, v00C, in66C, v66C, in448, v448, in44A, mesh);             // 7
+
+            CheckPrimitiveTriangle(in660, v660, in884, v884, inCC0, vCC0, in882, mesh);             // 8
+            CheckPrimitiveTriangle(in884, v884, in996, v996, inCC0, vCC0, in994, mesh);             // 9
+            CheckPrimitiveTriangle(inCCC, vCCC, inCC0, vCC0, in996, v996, inAA6, mesh);             // 10
+            CheckPrimitiveTriangle(in660, v660, in666, v666, in884, v884, in774, mesh);             // 11
+            CheckPrimitiveQuad(in666, v666, in888, v888, in996, v996, in884, v884, in886, mesh);    // 12
+            CheckPrimitiveTriangle(in888, v888, inCCC, vCCC, in996, v996, in998, mesh);             // 13
+            CheckPrimitiveTriangle(in666, v666, in66C, v66C, in888, v888, in778, mesh);             // 14
+            CheckPrimitiveTriangle(in66C, v66C, inCCC, vCCC, in888, v888, in88A, mesh);             // 15
+        }
     }
-
 
     // Check the "corner" triangles of the cubic lattice.
     public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int edge4, int mesh)
@@ -570,6 +648,7 @@ public class PlayerController : MonoBehaviour
         int in0C0 = CanFormTriangle4(v0C0, edge4);
         int inC00 = CanFormTriangle4(vC00, edge4);
         int in444 = CanFormTriangle4(v444, edge4);
+
         int in066 = CanFormTriangle4(v066, edge4);
         int in363 = CanFormTriangle4(v363, edge4);
         int in660 = CanFormTriangle4(v660, edge4);
@@ -583,6 +662,7 @@ public class PlayerController : MonoBehaviour
         int in471 = CanFormTriangle4(v471, edge4);
         int in741 = CanFormTriangle4(v741, edge4);
         int in714 = CanFormTriangle4(v714, edge4);
+
         int in435 = CanFormTriangle4(v435, edge4);
         int in345 = CanFormTriangle4(v345, edge4);
         int in354 = CanFormTriangle4(v354, edge4);
@@ -590,22 +670,31 @@ public class PlayerController : MonoBehaviour
         int in543 = CanFormTriangle4(v543, edge4);
         int in534 = CanFormTriangle4(v534, edge4);
 
-        // Form triangles where possible.
-        // The last test is for the "internal" point.
-        // Go clockwise...
-        CheckPrimitiveTriangle(in00C, v00C, in336, v336, in606, v606, in417, mesh);             // 0
-        CheckPrimitiveTriangle(in00C, v00C, in066, v066, in336, v336, in147, mesh);             // 1
-        CheckPrimitiveTriangle(in066, v066, in0C0, v0C0, in363, v363, in174, mesh);             // 2
-        CheckPrimitiveTriangle(in0C0, v0C0, in660, v660, in363, v363, in471, mesh);             // 3
-        CheckPrimitiveTriangle(in633, v633, in660, v660, inC00, vC00, in741, mesh);             // 4
-        CheckPrimitiveTriangle(in606, v606, in633, v633, inC00, vC00, in714, mesh);             // 5
+        if (in00C == 0 && in0C0 == 0 && inC00 == 0 && in444 == 0 && in066 == 0 && in363 == 0 && in660 == 0 && in336 == 0 && in633 == 0 && in606 == 0
+            && in417 == 0 && in147 == 0 && in174 == 0 && in471 == 0 && in741 == 0 && in714 == 0 && in435 == 0 && in345 == 0 && in354 == 0 && in453 == 0 && in543 == 0 && in534 == 0)
+        {
+            AddTriangleBoth(IntVectorToWorld(v00C), IntVectorToWorld(v0C0), IntVectorToWorld(vC00), mesh);
+            nFullCorners++;
+        }
+        else
+        {
+            // Form triangles where possible.
+            // The last test is for the "internal" point.
+            // Go clockwise...
+            CheckPrimitiveTriangle(in00C, v00C, in336, v336, in606, v606, in417, mesh);             // 0
+            CheckPrimitiveTriangle(in00C, v00C, in066, v066, in336, v336, in147, mesh);             // 1
+            CheckPrimitiveTriangle(in066, v066, in0C0, v0C0, in363, v363, in174, mesh);             // 2
+            CheckPrimitiveTriangle(in0C0, v0C0, in660, v660, in363, v363, in471, mesh);             // 3
+            CheckPrimitiveTriangle(in633, v633, in660, v660, inC00, vC00, in741, mesh);             // 4
+            CheckPrimitiveTriangle(in606, v606, in633, v633, inC00, vC00, in714, mesh);             // 5
 
-        CheckPrimitiveTriangle(in336, v336, in444, v444, in606, v606, in435, mesh);             // 6
-        CheckPrimitiveTriangle(in066, v066, in444, v444, in336, v336, in345, mesh);             // 7
-        CheckPrimitiveTriangle(in363, v363, in444, v444, in066, v066, in354, mesh);             // 8
-        CheckPrimitiveTriangle(in660, v660, in444, v444, in363, v363, in453, mesh);             // 9
-        CheckPrimitiveTriangle(in633, v633, in444, v444, in660, v660, in543, mesh);             // 10
-        CheckPrimitiveTriangle(in606, v606, in444, v444, in633, v633, in534, mesh);             // 11
+            CheckPrimitiveTriangle(in336, v336, in444, v444, in606, v606, in435, mesh);             // 6
+            CheckPrimitiveTriangle(in066, v066, in444, v444, in336, v336, in345, mesh);             // 7
+            CheckPrimitiveTriangle(in363, v363, in444, v444, in066, v066, in354, mesh);             // 8
+            CheckPrimitiveTriangle(in660, v660, in444, v444, in363, v363, in453, mesh);             // 9
+            CheckPrimitiveTriangle(in633, v633, in444, v444, in660, v660, in543, mesh);             // 10
+            CheckPrimitiveTriangle(in606, v606, in444, v444, in633, v633, in534, mesh);             // 11
+        }
     }
 
 
@@ -677,6 +766,20 @@ public class PlayerController : MonoBehaviour
         if (nResult == 1)
         {
             if (v.x == 0 || v.x == nFullDivisions || v.y == 0 || v.y == nFullDivisions || v.z == 0 || v.z == nFullDivisions)
+            {
+                nResult = 0;
+            }
+        }
+        return nResult;
+    }
+
+    public int CanFormTriangle4IntEx(int s1, int s2, int s3, int s4)
+    {
+        int nResult = CanFormTriangle4Int(s1, s2, s3, s4);
+
+        if (nResult == 1)
+        {
+            if (s1 == 0 || s1 == nFullDivisions || s2 == 0 || s2 == nFullDivisions || s3 == 0 || s3 == nFullDivisions)
             {
                 nResult = 0;
             }
