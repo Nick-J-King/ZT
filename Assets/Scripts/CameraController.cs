@@ -75,7 +75,7 @@ public class CameraController : MonoBehaviour {
 
     public void SetCameraAzimuthElevation(AzimuthElevation azimuthElevation)
     {
-        Vector3 position = new Vector3(0.0f, 0.0f, -38.0f);
+        Vector3 position = new Vector3(0.0f, 0.0f, -40.0f);
 
         Quaternion rotation = Quaternion.Euler(-azimuthElevation.elevation, azimuthElevation.azimuth, 0.0f);
 

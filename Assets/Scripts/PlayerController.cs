@@ -30,8 +30,15 @@ public class PlayerController : MonoBehaviour
     public Slider sliderVertexSize;
 
     public Toggle toggleAnimate;
+    public Slider SliderAnimateSpeed;
+
+    public Toggle toggleFlip;
+    public Toggle toggleFrame;
+    public Toggle toggleClosure;
 
     public Text TextStatus;
+
+    public GameObject goFrame;
 
     // External game objects.
     public Light directionalLight;
@@ -61,6 +68,7 @@ public class PlayerController : MonoBehaviour
     private int sliderFullInt5thEdge;
 
     private int dropdownEdgesInt;
+    private bool doClosure;
 
     // Mesh gameobjects.
     public GameObject mfMain;
@@ -139,7 +147,7 @@ public class PlayerController : MonoBehaviour
     {
         if (toggleAnimate.isOn)
         {
-            mfMain.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 30.0f);
+            mfMain.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * SliderAnimateSpeed.value);
         }
     }
 
@@ -203,7 +211,7 @@ public class PlayerController : MonoBehaviour
         if (sliderInt5thEdge > nDivisions) sliderInt5thEdge = nDivisions;
 
 
-        text4thEdge.text = "4th edge: " + sliderInt.ToString();
+        text4thEdge.text = "Edges: " + sliderInt.ToString() + " " + sliderInt5thEdge.ToString();
 
         // Vertices
         if (displayVertices != togglePoints.isOn)
@@ -217,6 +225,14 @@ public class PlayerController : MonoBehaviour
             vertexSize = sliderVertexSize.value;
             changed = true;
         }
+
+
+        if (doClosure != toggleClosure.isOn)
+        {
+            doClosure = toggleClosure.isOn;
+            changed = true;
+        }
+
 
         // Internal parameters.
         nFullDivisions = nDivisions * 12;
@@ -237,6 +253,24 @@ public class PlayerController : MonoBehaviour
         scale = size / max * vertexSize + 0.10f;
 
         return changed;
+    }
+
+
+    public void CheckFrameToggle()
+    {
+        goFrame.SetActive(toggleFrame.isOn);
+    }
+
+    public void CheckFlipToggle()
+    {
+        if (toggleFlip.isOn)
+        {
+            mfMain.transform.localScale = new Vector3(1.0f, -1.0f, 1.0f);
+        }
+        else
+        {
+            mfMain.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        }
     }
 
 
@@ -341,7 +375,7 @@ public class PlayerController : MonoBehaviour
                                                     if (nIsSet110 == 0) nSet++;
                                                     if (nIsSet111 == 0) nSet++;
                             */
-                            if (displayVertices && CanFormTriangleEx(intXfull, intYfull, intZfull) == 0)
+                            if (displayVertices && CanFormTriangleVertex(intXfull, intYfull, intZfull) == 0)
                             {
                                 s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                                 s.transform.parent = mfMain.transform;
@@ -809,16 +843,38 @@ public class PlayerController : MonoBehaviour
             nResult = CanFormTriangle3Int(s1, s2, s3);
         }
 
-        if (nResult == 1)
+        if (doClosure)
         {
-            if (s1 == 0 || s1 == nFullDivisions || s2 == 0 || s2 == nFullDivisions || s3 == 0 || s3 == nFullDivisions)
+            if (nResult == 1)
             {
-                nResult = 0;
+                if (s1 == 0 || s1 == nFullDivisions || s2 == 0 || s2 == nFullDivisions || s3 == 0 || s3 == nFullDivisions)
+                {
+                    nResult = 0;
+                }
             }
         }
         return nResult;
     }
 
+
+    public int CanFormTriangleVertex(int s1, int s2, int s3)
+    {
+        int nResult;
+        if (dropdownEdgesInt == 2)
+        {
+            nResult = CanFormTriangle5Int(s1, s2, s3);
+        }
+        else if (dropdownEdgesInt == 1)
+        {
+            nResult = CanFormTriangle4Int(s1, s2, s3);
+        }
+        else
+        {
+            nResult = CanFormTriangle3Int(s1, s2, s3);
+        }
+
+        return nResult;
+    }
 
 
     //-----------------------------------------------------
