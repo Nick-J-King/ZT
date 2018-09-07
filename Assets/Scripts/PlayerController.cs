@@ -6,6 +6,7 @@ using System.Collections.Generic;
 // Player controller
 public class PlayerController : MonoBehaviour
 {
+    public Material vertexMaterial;
 
     public int nFullFlats;
     public int nFullDiagonals;
@@ -95,6 +96,10 @@ public class PlayerController : MonoBehaviour
     // List of vertex spheres.
     private GameObject s;
     private ArrayList myList;
+
+
+    public CameraController mainCamController;
+    public Camera mainCam;
 
 
     void Start()
@@ -250,7 +255,7 @@ public class PlayerController : MonoBehaviour
         max = (float)nDivisions;
         fullMax = (float)nFullDivisions;
 
-        scale = size / max * vertexSize + 0.10f;
+        scale = size / max * vertexSize + 0.05f;
 
         return changed;
     }
@@ -280,6 +285,14 @@ public class PlayerController : MonoBehaviour
         mfMain.transform.localEulerAngles = Vector3.zero;
     }
 
+    public void ResetCamera()
+    {
+        mainCamController.azimuthElevation.azimuth = 0;
+        mainCamController.azimuthElevation.elevation = 0;
+        mainCamController.SetCameraAzimuthElevation(mainCamController.azimuthElevation);
+    }
+
+
     // We have the internal parameters set.
     // Now, compute the geometry of the figure.
     public void ComputeGeometry()
@@ -303,131 +316,225 @@ public class PlayerController : MonoBehaviour
         float y0;
         float z0;
 
-        //float x8;
-        //float y8;
-        //float z8;
+        float x8;
+        float y8;
+        float z8;
+        x0 = GridToWorld(0);
+        y0 = GridToWorld(0);
+        z0 = GridToWorld(0);
 
-        for (int intX = 0; intX <= nDivisions; intX++)
+        x8 = GridToWorld(nFullDivisions);
+        y8 = GridToWorld(nFullDivisions);
+        z8 = GridToWorld(nFullDivisions);
+
+
+        Vector3 v000 = new Vector3(x0, y0, z0);
+        Vector3 v100 = new Vector3(x8, y0, z0);
+        Vector3 v010 = new Vector3(x0, y8, z0);
+        Vector3 v110 = new Vector3(x8, y8, z0);
+        Vector3 v001 = new Vector3(x0, y0, z8);
+        Vector3 v101 = new Vector3(x8, y0, z8);
+        Vector3 v011 = new Vector3(x0, y8, z8);
+        Vector3 v111 = new Vector3(x8, y8, z8);
+
+
+        //AddQuadBoth(v000, v010, v001, v011, 1);     // Left
+        //AddQuadBoth(v100, v110, v101, v111, 1);     // Right
+
+        //AddQuadBoth(v000, v010, v100, v110, 1);     // Font
+
+        AddQuadBoth(v000, v010, v101, v111, 1);     // 
+        AddQuadBoth(v100, v110, v001, v011, 1);     // 
+
+        AddQuadBoth(v000, v100, v011, v111, 1);     // 
+        AddQuadBoth(v010, v110, v001, v101, 1);     // 
+
+        AddQuadBoth(v000, v110, v001, v111, 1);     // 
+        AddQuadBoth(v010, v100, v011, v101, 1);     // 
+
+        AddTriangleBoth(v010, v100, v001, 1);     // 000
+        AddTriangleBoth(v011, v101, v000, 1);     // 001
+        AddTriangleBoth(v000, v110, v011, 1);     // 010
+        AddTriangleBoth(v110, v000, v101, 1);     // 100
+
+        AddTriangleBoth(v100, v010, v111, 1);     // 110
+        AddTriangleBoth(v111, v001, v100, 1);     // 101
+
+        AddTriangleBoth(v101, v011, v110, 1);     // 111
+        AddTriangleBoth(v001, v111, v010, 1);     // 011
+
+        if (true)
         {
-            int intXfull = intX * 12;
-
-            x0 = GridToWorld(intXfull);
-            //x8 = cubeToWorld(intToFloat(intXfull + 12));
-
-            for (int intY = 0; intY <= nDivisions; intY++)
+            for (int intX = 0; intX <= nDivisions; intX++)
             {
-                int intYfull = intY * 12;
+                int intXfull = intX * 12;
 
-                y0 = GridToWorld(intYfull);
-                //y8 = cubeToWorld(intToFloat(intYfull + 12));
+                x0 = GridToWorld(intXfull);
+                //x8 = cubeToWorld(intToFloat(intXfull + 12));
 
-                for (int intZ = 0; intZ <= nDivisions; intZ++)
+                for (int intY = 0; intY <= nDivisions; intY++)
                 {
-                    int intZfull = intZ * 12;
+                    int intYfull = intY * 12;
 
-                    z0 = GridToWorld(intZfull);
-                    //z8 = cubeToWorld(intToFloat(intZfull + 12));
+                    y0 = GridToWorld(intYfull);
+                    //y8 = cubeToWorld(intToFloat(intYfull + 12));
 
-
-                    //if (x > y && y > z)
+                    for (int intZ = 0; intZ <= nDivisions; intZ++)
                     {
-                        int nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
-                        int nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
-                        int nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
-                        int nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
-                        int nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
-                        int nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
-                        int nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
-                        int nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
+                        int intZfull = intZ * 12;
 
-                        // Don't bother if cube corners are all fully in or fully out.
-                        if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
+                        z0 = GridToWorld(intZfull);
+                        //z8 = cubeToWorld(intToFloat(intZfull + 12));
+
+
                         {
-                            /*
-                                                    Vector3 v000 = new Vector3(x0, y0, z0);
-                                                    Vector3 v100 = new Vector3(x8, y0, z0);
-                                                    Vector3 v010 = new Vector3(x0, y8, z0);
-                                                    Vector3 v110 = new Vector3(x8, y8, z0);
-                                                    Vector3 v001 = new Vector3(x0, y0, z8);
-                                                    Vector3 v101 = new Vector3(x8, y0, z8);
-                                                    Vector3 v011 = new Vector3(x0, y8, z8);
-                                                    Vector3 v111 = new Vector3(x8, y8, z8);
-                            */
-                            Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
-                            Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
-                            Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
-                            Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
-                            Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
-                            Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
-                            Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
-                            Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
+                            s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                            s.transform.parent = mfMain.transform;
 
-                            //
-                            //
-                            /*
-                                                    int nSet = 0;
-                                                    if (nIsSet000 == 0) nSet++;
-                                                    if (nIsSet001 == 0) nSet++;
-                                                    if (nIsSet010 == 0) nSet++;
-                                                    if (nIsSet011 == 0) nSet++;
-                                                    if (nIsSet100 == 0) nSet++;
-                                                    if (nIsSet101 == 0) nSet++;
-                                                    if (nIsSet110 == 0) nSet++;
-                                                    if (nIsSet111 == 0) nSet++;
-                            */
-                            if (displayVertices && CanFormTriangleVertex(intXfull, intYfull, intZfull) == 0)
-                            {
-                                s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                                s.transform.parent = mfMain.transform;
+                            s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
+                            s.transform.localScale = new Vector3(scale, scale, scale);
 
-                                s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
-                                s.transform.localScale = new Vector3(scale, scale, scale);
-
-                                myList.Add(s);
-                            }
+                            s.GetComponent<Renderer>().material = vertexMaterial;
+                            s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
 
-                            // Flat faces
-
-                            CheckFlatFace(v000i, v010i, v011i, v001i, 0);    // Along x = 0
-                            CheckFlatFace(v000i, v001i, v101i, v100i, 1);    // Along y = 0
-                            CheckFlatFace(v000i, v100i, v110i, v010i, 2);    // Along z = 0
-
-
-                            // Diagonals across faces
-
-                            CheckDiagonalFace(v000i, v100i, v111i, v011i, 3); // Along x
-                            CheckDiagonalFace(v010i, v110i, v101i, v001i, 4); // Along x
-
-                            CheckDiagonalFace(v000i, v010i, v111i, v101i, 5); // Along y
-                            CheckDiagonalFace(v001i, v011i, v110i, v100i, 6); // Along y
-
-                            CheckDiagonalFace(v000i, v001i, v111i, v110i, 7); // Along z
-                            CheckDiagonalFace(v010i, v011i, v101i, v100i, 8); // Along z
-
-
-                            // Corners
-
-                            CheckCornerTriangle(v100i, v010i, v001i, 9);   // Around 000
-                            CheckCornerTriangle(v110i, v101i, v011i, 9);   // Around 111
-
-                            CheckCornerTriangle(v000i, v101i, v110i, 10);  // Around 100
-                            CheckCornerTriangle(v111i, v001i, v010i, 10);  // Around 011
-
-                            CheckCornerTriangle(v100i, v111i, v001i, 11);  // Around 101
-                            CheckCornerTriangle(v110i, v000i, v011i, 11);  // Around 010
-
-                            CheckCornerTriangle(v101i, v011i, v000i, 12);  // Around 001
-                            CheckCornerTriangle(v111i, v100i, v010i, 12);  // Around 110
+                            myList.Add(s);
                         }
-                        else
+
+                    }
+                }
+            }
+        }
+
+        if (false)
+        {
+            for (int intX = 0; intX <= nDivisions; intX++)
+            {
+                int intXfull = intX * 12;
+
+                x0 = GridToWorld(intXfull);
+                //x8 = cubeToWorld(intToFloat(intXfull + 12));
+
+                for (int intY = 0; intY <= nDivisions; intY++)
+                {
+                    int intYfull = intY * 12;
+
+                    y0 = GridToWorld(intYfull);
+                    //y8 = cubeToWorld(intToFloat(intYfull + 12));
+
+                    for (int intZ = 0; intZ <= nDivisions; intZ++)
+                    {
+                        int intZfull = intZ * 12;
+
+                        z0 = GridToWorld(intZfull);
+                        //z8 = cubeToWorld(intToFloat(intZfull + 12));
+
+
+                        //if (x > y && y > z)
                         {
-                            nFullyInOrOut++;
+                            int nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
+                            int nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                            int nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                            int nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+                            int nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                            int nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                            int nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+                            int nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
+
+                            // Don't bother if cube corners are all fully in or fully out.
+                            if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
+                            {
+                                /*
+                                                        Vector3 v000 = new Vector3(x0, y0, z0);
+                                                        Vector3 v100 = new Vector3(x8, y0, z0);
+                                                        Vector3 v010 = new Vector3(x0, y8, z0);
+                                                        Vector3 v110 = new Vector3(x8, y8, z0);
+                                                        Vector3 v001 = new Vector3(x0, y0, z8);
+                                                        Vector3 v101 = new Vector3(x8, y0, z8);
+                                                        Vector3 v011 = new Vector3(x0, y8, z8);
+                                                        Vector3 v111 = new Vector3(x8, y8, z8);
+                                */
+                                Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
+                                Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
+                                Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
+                                Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
+                                Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
+                                Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
+                                Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
+                                Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
+
+                                //
+                                //
+                                /*
+                                                        int nSet = 0;
+                                                        if (nIsSet000 == 0) nSet++;
+                                                        if (nIsSet001 == 0) nSet++;
+                                                        if (nIsSet010 == 0) nSet++;
+                                                        if (nIsSet011 == 0) nSet++;
+                                                        if (nIsSet100 == 0) nSet++;
+                                                        if (nIsSet101 == 0) nSet++;
+                                                        if (nIsSet110 == 0) nSet++;
+                                                        if (nIsSet111 == 0) nSet++;
+                                */
+                                if (displayVertices && CanFormTriangleVertex(intXfull, intYfull, intZfull) == 0)
+                                {
+                                    s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                                    s.transform.parent = mfMain.transform;
+
+                                    s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
+                                    s.transform.localScale = new Vector3(scale, scale, scale);
+
+                                    s.GetComponent<Renderer>().material = vertexMaterial;
+                                    s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+
+                                    myList.Add(s);
+                                }
+
+
+                                // Flat faces
+
+                                CheckFlatFace(v000i, v010i, v011i, v001i, 0);    // Along x = 0
+                                CheckFlatFace(v000i, v001i, v101i, v100i, 1);    // Along y = 0
+                                CheckFlatFace(v000i, v100i, v110i, v010i, 2);    // Along z = 0
+
+
+                                // Diagonals across faces
+
+                                CheckDiagonalFace(v000i, v100i, v111i, v011i, 3); // Along x
+                                CheckDiagonalFace(v010i, v110i, v101i, v001i, 4); // Along x
+
+                                CheckDiagonalFace(v000i, v010i, v111i, v101i, 5); // Along y
+                                CheckDiagonalFace(v001i, v011i, v110i, v100i, 6); // Along y
+
+                                CheckDiagonalFace(v000i, v001i, v111i, v110i, 7); // Along z
+                                CheckDiagonalFace(v010i, v011i, v101i, v100i, 8); // Along z
+
+
+                                // Corners
+
+                                CheckCornerTriangle(v100i, v010i, v001i, 9);   // Around 000
+                                CheckCornerTriangle(v110i, v101i, v011i, 9);   // Around 111
+
+                                CheckCornerTriangle(v000i, v101i, v110i, 10);  // Around 100
+                                CheckCornerTriangle(v111i, v001i, v010i, 10);  // Around 011
+
+                                CheckCornerTriangle(v100i, v111i, v001i, 11);  // Around 101
+                                CheckCornerTriangle(v110i, v000i, v011i, 11);  // Around 010
+
+                                CheckCornerTriangle(v101i, v011i, v000i, 12);  // Around 001
+                                CheckCornerTriangle(v111i, v100i, v010i, 12);  // Around 110
+                            }
+                            else
+                            {
+                                nFullyInOrOut++;
+                            }
                         }
                     }
                 }
             }
         }
+
 
         // Now put the list of triangles in each mesh.
         for (int i = 0; i < 14; i++)
@@ -435,8 +542,8 @@ public class PlayerController : MonoBehaviour
             ProcessMesh(i);
         }
 
-        TextStatus.text = "F: " + nFullFlats.ToString() + " D:" + nFullDiagonals.ToString() + " C:" + nFullCorners.ToString() + " IO:" + nFullyInOrOut.ToString();
 
+        TextStatus.text = "F: " + nFullFlats.ToString() + " D:" + nFullDiagonals.ToString() + " C:" + nFullCorners.ToString() + " IO:" + nFullyInOrOut.ToString();
     }
 
 
