@@ -465,6 +465,24 @@ public class PlayerController : MonoBehaviour
 
     private void DoFullFigure()
     {
+        Vector3Int v010 = new Vector3Int(0, 1, 0);
+        Vector3Int v001 = new Vector3Int(0, 0, 1);
+        Vector3Int v011 = new Vector3Int(0, 1, 1);
+        Vector3Int v0m11 = new Vector3Int(0, -1, 1);
+        Vector3Int v100 = new Vector3Int(1, 0, 0);
+        Vector3Int v101 = new Vector3Int(1, 0, 1);
+        Vector3Int v110 = new Vector3Int(1, 1, 0);
+        Vector3Int v10m1 = new Vector3Int(1, 0, -1);
+        Vector3Int v1m10 = new Vector3Int(1, -1, 0);
+
+        Vector3Int vm110 = new Vector3Int(-1, 1, 0);
+        Vector3Int vm101 = new Vector3Int(-1, 0, 1);
+
+        Vector3Int vm1m10 = new Vector3Int(-1, -1, 0);
+        Vector3Int vm10m1 = new Vector3Int(-1, 0, -1);
+
+        Vector3Int v0m1m1 = new Vector3Int(0, -1, -1);
+
         float x0;
         float y0;
         float z0;
@@ -532,36 +550,36 @@ public class PlayerController : MonoBehaviour
 
                             // Flat faces
 
-                            CheckFlatFace(v000i, v010i, v011i, v001i, 0);    // Along x = 0
-                            CheckFlatFace(v000i, v001i, v101i, v100i, 1);    // Along y = 0
-                            CheckFlatFace(v000i, v100i, v110i, v010i, 2);    // Along z = 0
+                            CheckFlatFace(v000i, v010i, v011i, v001i, 0, v010, v001);    // Along x = 0
+                            CheckFlatFace(v000i, v001i, v101i, v100i, 1, v001, v100);    // Along y = 0
+                            CheckFlatFace(v000i, v100i, v110i, v010i, 2, v100, v010);    // Along z = 0
 
 
                             // Diagonals across faces
 
-                            CheckDiagonalFace(v000i, v100i, v111i, v011i, 3); // Along x
-                            CheckDiagonalFace(v010i, v110i, v101i, v001i, 4); // Along x
+                            CheckDiagonalFace(v000i, v100i, v111i, v011i, 3, v100, v011); // Along x
+                            CheckDiagonalFace(v010i, v110i, v101i, v001i, 4, v100, v0m11); // Along x
 
-                            CheckDiagonalFace(v000i, v010i, v111i, v101i, 5); // Along y
-                            CheckDiagonalFace(v001i, v011i, v110i, v100i, 6); // Along y
+                            CheckDiagonalFace(v000i, v010i, v111i, v101i, 5, v010, v101); // Along y
+                            CheckDiagonalFace(v001i, v011i, v110i, v100i, 6, v010, v10m1); // Along y
 
-                            CheckDiagonalFace(v000i, v001i, v111i, v110i, 7); // Along z
-                            CheckDiagonalFace(v010i, v011i, v101i, v100i, 8); // Along z
+                            CheckDiagonalFace(v000i, v001i, v111i, v110i, 7, v001, v110); // Along z
+                            CheckDiagonalFace(v010i, v011i, v101i, v100i, 8, v001, v1m10); // Along z
 
 
                             // Corners
 
-                            CheckCornerTriangle(v100i, v010i, v001i, 9);   // Around 000
-                            CheckCornerTriangle(v110i, v101i, v011i, 9);   // Around 111
+                            CheckCornerTriangle(v100i, v010i, v001i, 9, vm110, vm101);   // Around 000
+                            CheckCornerTriangle(v110i, v101i, v011i, 9, v0m11, vm101);   // Around 111
 
-                            CheckCornerTriangle(v000i, v101i, v110i, 10);  // Around 100
-                            CheckCornerTriangle(v111i, v001i, v010i, 10);  // Around 011
+                            CheckCornerTriangle(v000i, v101i, v110i, 10, v101, v110);  // Around 100
+                            CheckCornerTriangle(v111i, v001i, v010i, 10, vm1m10, vm10m1);  // Around 011
 
-                            CheckCornerTriangle(v100i, v111i, v001i, 11);  // Around 101
-                            CheckCornerTriangle(v110i, v000i, v011i, 11);  // Around 010
+                            CheckCornerTriangle(v100i, v111i, v001i, 11, v011, vm101);  // Around 101
+                            CheckCornerTriangle(v110i, v000i, v011i, 11, vm1m10, vm101);  // Around 010
 
-                            CheckCornerTriangle(v101i, v011i, v000i, 12);  // Around 001
-                            CheckCornerTriangle(v111i, v100i, v010i, 12);  // Around 110
+                            CheckCornerTriangle(v101i, v011i, v000i, 12, vm110, vm10m1);  // Around 001
+                            CheckCornerTriangle(v111i, v100i, v010i, 12, v0m1m1, vm10m1);  // Around 110
                         }
                         else
                         {
@@ -654,12 +672,8 @@ public class PlayerController : MonoBehaviour
     // Check the "outer" faces of the cubic lattice.
     // Here, we assume the vertex vectors are in steps of 12.
     // This allows perfect integer arithmetic to determine "zero-triangularity".
-    public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int mesh)
+    public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int mesh, Vector3Int vu00to0C, Vector3Int vu00toC0)
     {
-        // Get unit vectors in the square to navigate it.
-        Vector3Int vu00toC0 = new Vector3Int(((vC0.x - v00.x) / 12), ((vC0.y - v00.y) / 12), ((vC0.z - v00.z) / 12));   // Unit vector from v00 to vC0
-        Vector3Int vu00to0C = new Vector3Int(((v0C.x - v00.x) / 12), ((v0C.y - v00.y) / 12), ((v0C.z - v00.z) / 12));   // Unit vector from v00 to v0C
-
         // "Middle" points.
         Vector3Int v36 = MixVectors3Int(v00, vu00toC0, 3, vu00to0C, 6);
         Vector3Int v69 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 9);
@@ -693,14 +707,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     // Check the "diagonal" rectangles of the cubic lattice.
-    public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int mesh)
+    public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int mesh, Vector3Int vu000to00C, Vector3Int vu000toCC0)
     {
-        // Get unit vectors in the square to navigate it.
-        Vector3Int vu000toCC0 = new Vector3Int(((vCC0.x - v000.x) / 12), ((vCC0.y - v000.y) / 12), ((vCC0.z - v000.z) / 12));   // Unit vector from v000 to vCC0
-        Vector3Int vu000to00C = new Vector3Int(((v00C.x - v000.x) / 12), ((v00C.y - v000.y) / 12), ((v00C.z - v000.z) / 12));   // Unit vector from v000 to v00C
-
         // "Middle" points.
         Vector3Int v442 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 2);
         Vector3Int v334 = MixVectors3Int(v000, vu000toCC0, 3, vu000to00C, 4);
@@ -764,39 +773,34 @@ public class PlayerController : MonoBehaviour
             // Form triangles where possible.
             // The last test is for the "internal" point.
             // Go clockwise...
-            CheckPrimitiveTriangle(v000, v444, v660, in442, mesh);             // 0
-            CheckPrimitiveTriangle(v000, v336, v444, in334, mesh);             // 1
-            CheckPrimitiveTriangle(v000, v00C, v336, in226, mesh);             // 2
-            CheckPrimitiveTriangle(v660, v444, v666, in554, mesh);             // 3
-
-
-            CheckPrimitiveTriangle(v00C, v448, v336, in338, mesh);             // 5
-            CheckPrimitiveTriangle(v66C, v666, v448, in558, mesh);             // 6
-            CheckPrimitiveTriangle(v00C, v66C, v448, in44A, mesh);             // 7
-
-            CheckPrimitiveTriangle(v660, v884, vCC0, in882, mesh);             // 8
-            CheckPrimitiveTriangle(v884, v996, vCC0, in994, mesh);             // 9
-            CheckPrimitiveTriangle(vCCC, vCC0, v996, inAA6, mesh);             // 10
-            CheckPrimitiveTriangle(v660, v666, v884, in774, mesh);             // 11
-
-
-            CheckPrimitiveTriangle(v888, vCCC, v996, in998, mesh);             // 13
-            CheckPrimitiveTriangle(v666, v66C, v888, in778, mesh);             // 14
-            CheckPrimitiveTriangle(v66C, vCCC, v888, in88A, mesh);             // 15
+            CheckPrimitiveTriangle(v000, v444, v660, in442, mesh);      // 0
+            CheckPrimitiveTriangle(v000, v336, v444, in334, mesh);      // 1
+            CheckPrimitiveTriangle(v000, v00C, v336, in226, mesh);      // 2
+            CheckPrimitiveTriangle(v660, v444, v666, in554, mesh);      // 3
 
             CheckPrimitiveQuad(v448, v666, v444, v336, in446, mesh);    // 4
+
+            CheckPrimitiveTriangle(v00C, v448, v336, in338, mesh);      // 5
+            CheckPrimitiveTriangle(v66C, v666, v448, in558, mesh);      // 6
+            CheckPrimitiveTriangle(v00C, v66C, v448, in44A, mesh);      // 7
+
+            CheckPrimitiveTriangle(v660, v884, vCC0, in882, mesh);      // 8
+            CheckPrimitiveTriangle(v884, v996, vCC0, in994, mesh);      // 9
+            CheckPrimitiveTriangle(vCCC, vCC0, v996, inAA6, mesh);      // 10
+            CheckPrimitiveTriangle(v660, v666, v884, in774, mesh);      // 11
+
             CheckPrimitiveQuad(v666, v888, v996, v884, in886, mesh);    // 12
+
+            CheckPrimitiveTriangle(v888, vCCC, v996, in998, mesh);      // 13
+            CheckPrimitiveTriangle(v666, v66C, v888, in778, mesh);      // 14
+            CheckPrimitiveTriangle(v66C, vCCC, v888, in88A, mesh);      // 15
         }
     }
 
 
     // Check the "corner" triangles of the cubic lattice.
-    public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int mesh)
+    public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int mesh, Vector3Int vu00Cto0C0, Vector3Int vu00CtoC00)
     {
-        // Get unit vectors in the square to navigate it.
-        Vector3Int vu00CtoC00 = new Vector3Int(((vC00.x - v00C.x) / 12), ((vC00.y - v00C.y) / 12), ((vC00.z - v00C.z) / 12));   // Unit vector from v00C to vC00 (x)
-        Vector3Int vu00Cto0C0 = new Vector3Int(((v0C0.x - v00C.x) / 12), ((v0C0.y - v00C.y) / 12), ((v0C0.z - v00C.z) / 12));   // Unit vector from v00C to v0C0 (y)
-
         // "Middle" points.
         Vector3Int v417 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 1);  // 0
         Vector3Int v147 = MixVectors3Int(v00C, vu00CtoC00, 1, vu00Cto0C0, 4);  // 1
