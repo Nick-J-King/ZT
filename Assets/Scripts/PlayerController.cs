@@ -3,6 +3,12 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+public class CellData
+{
+    public int status;
+    public Vector3 worldCoords;
+}
+
 
 // Player controller
 public class PlayerController : MonoBehaviour
@@ -45,10 +51,10 @@ public class PlayerController : MonoBehaviour
     public Light directionalLight;
 
     // Internal cache for building meshes.
-    public int [] myNumVerts;
-    public int [] myNumTriangles;
-    public List<Vector3> [] myVerts;
-    public List<int> [] myTriangles;
+    public int[] myNumVerts;
+    public int[] myNumTriangles;
+    public List<Vector3>[] myVerts;
+    public List<int>[] myTriangles;
 
     // Internal parameters.
     private float size;
@@ -100,6 +106,11 @@ public class PlayerController : MonoBehaviour
 
     public CameraController mainCamController;
     public Camera mainCam;
+
+    // Cache the cube corner info for each layer of (x,y) as we move through z
+    public CellData[,,] xcc;    // x,y, layer (0,1)
+    public int xccAL;
+    public int xccWL;
 
 
     void Start()
@@ -386,36 +397,6 @@ public class PlayerController : MonoBehaviour
         AddTriangleBoth(v444, v660, vC00, 1);
         AddTriangleBoth(v000, v660, v844, 1);
 
-        /*
-
-        //AddQuadBoth(v000, v010, v001, v011, 1);     // Left
-        //AddQuadBoth(v100, v110, v101, v111, 1);     // Right
-
-        //AddQuadBoth(v000, v010, v100, v110, 1);     // Font
-
-
-        // AddQuadBoth(v000, v010, v101, v111, 1);     // along x
-        //AddQuadBoth(v100, v110, v001, v011, 1);     // 
-
-        AddQuadBoth(v000, vC00, v0CC, vCCC, 1);     // along y
-        AddQuadBoth(v0C0, vCC0, v00C, vC0C, 1);     // 
-
-        AddQuadBoth(v000, vCC0, v00C, vCCC, 1);     // along z
-        AddQuadBoth(v0C0, vC00, v0CC, vC0C, 1);     // 
-
-
-        AddTriangleBoth(v0C0, vC00, v00C, 1);     // 000
-        //AddTriangleBoth(v011, v101, v000, 1);     // 001
-        AddTriangleBoth(v000, vCC0, v0CC, 1);     // 010
-        AddTriangleBoth(vCC0, v000, vC0C, 1);     // 100
-
-        AddTriangleBoth(vC00, v0C0, vCCC, 1);     // 110
-        //AddTriangleBoth(v111, v001, v100, 1);     // 101
-
-        //AddTriangleBoth(v101, v011, v110, 1);     // 111
-        //AddTriangleBoth(v001, v111, v010, 1);     // 011
-        */
-
 
         float x0;
         float y0;
@@ -424,39 +405,29 @@ public class PlayerController : MonoBehaviour
         for (int intX = 0; intX <= nDivisions; intX++)
         {
             int intXfull = intX * 12;
-
             x0 = GridToWorld(intXfull);
-            //x8 = cubeToWorld(intToFloat(intXfull + 12));
 
             for (int intY = 0; intY <= nDivisions; intY++)
             {
                 int intYfull = intY * 12;
-
                 y0 = GridToWorld(intYfull);
-                //y8 = cubeToWorld(intToFloat(intYfull + 12));
 
                 for (int intZ = 0; intZ <= nDivisions; intZ++)
                 {
                     int intZfull = intZ * 12;
-
                     z0 = GridToWorld(intZfull);
-                    //z8 = cubeToWorld(intToFloat(intZfull + 12));
+
+                    s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    s.transform.parent = mfMain.transform;
+
+                    s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
+                    s.transform.localScale = new Vector3(scale, scale, scale);
+
+                    s.GetComponent<Renderer>().material = vertexMaterial;
+                    s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
 
-                    {
-                        s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        s.transform.parent = mfMain.transform;
-
-                        s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
-                        s.transform.localScale = new Vector3(scale, scale, scale);
-
-                        s.GetComponent<Renderer>().material = vertexMaterial;
-                        s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-
-                        myList.Add(s);
-                    }
-
+                    myList.Add(s);
                 }
             }
         }
@@ -465,129 +436,229 @@ public class PlayerController : MonoBehaviour
 
     private void DoFullFigure()
     {
-        Vector3Int v010 = new Vector3Int(0, 1, 0);
-        Vector3Int v001 = new Vector3Int(0, 0, 1);
-        Vector3Int v011 = new Vector3Int(0, 1, 1);
-        Vector3Int v0m11 = new Vector3Int(0, -1, 1);
-        Vector3Int v100 = new Vector3Int(1, 0, 0);
-        Vector3Int v101 = new Vector3Int(1, 0, 1);
-        Vector3Int v110 = new Vector3Int(1, 1, 0);
-        Vector3Int v10m1 = new Vector3Int(1, 0, -1);
-        Vector3Int v1m10 = new Vector3Int(1, -1, 0);
+        Vector3Int vu100 = new Vector3Int(1, 0, 0);
+        Vector3Int vu010 = new Vector3Int(0, 1, 0);
+        Vector3Int vu001 = new Vector3Int(0, 0, 1);
 
-        Vector3Int vm110 = new Vector3Int(-1, 1, 0);
-        Vector3Int vm101 = new Vector3Int(-1, 0, 1);
+        Vector3Int vu0m11 = new Vector3Int(0, -1, 1);
+        Vector3Int vu0m1m1 = new Vector3Int(0, -1, -1);
 
-        Vector3Int vm1m10 = new Vector3Int(-1, -1, 0);
-        Vector3Int vm10m1 = new Vector3Int(-1, 0, -1);
+        Vector3Int vu011 = new Vector3Int(0, 1, 1);
+        Vector3Int vu101 = new Vector3Int(1, 0, 1);
+        Vector3Int vu110 = new Vector3Int(1, 1, 0);
 
-        Vector3Int v0m1m1 = new Vector3Int(0, -1, -1);
+        Vector3Int vu10m1 = new Vector3Int(1, 0, -1);
+        Vector3Int vu1m10 = new Vector3Int(1, -1, 0);
+
+        Vector3Int vum110 = new Vector3Int(-1, 1, 0);
+        Vector3Int vum101 = new Vector3Int(-1, 0, 1);
+        Vector3Int vum1m10 = new Vector3Int(-1, -1, 0);
+        Vector3Int vum10m1 = new Vector3Int(-1, 0, -1);
+
+        xcc = new CellData[nDivisions + 2, nDivisions + 2, 2];
+
+        for (int a = 0; a <= nDivisions + 1; a++)
+        {
+            for (int b = 0; b <= nDivisions + 1; b++)
+            {
+                xcc[a, b, 0] = new CellData();
+                xcc[a, b, 1] = new CellData();
+            }
+        }
+
+        xccAL = 0;
+        xccWL = 1;
+
 
         float x0;
         float y0;
         float z0;
 
-        for (int intX = 0; intX <= nDivisions; intX++)
+        for (int intZ = 0; intZ <= nDivisions; intZ++)
         {
-            int intXfull = intX * 12;
+            int intZfull = intZ * 12;
 
-            x0 = GridToWorld(intXfull);
-            //x8 = cubeToWorld(intToFloat(intXfull + 12));
+            z0 = GridToWorld(intZfull);
 
             for (int intY = 0; intY <= nDivisions; intY++)
             {
                 int intYfull = intY * 12;
 
                 y0 = GridToWorld(intYfull);
-                //y8 = cubeToWorld(intToFloat(intYfull + 12));
 
-                for (int intZ = 0; intZ <= nDivisions; intZ++)
+                for (int intX = 0; intX <= nDivisions; intX++)
                 {
-                    int intZfull = intZ * 12;
+                    int intXfull = intX * 12;
 
-                    z0 = GridToWorld(intZfull);
-                    //z8 = cubeToWorld(intToFloat(intZfull + 12));
+                    x0 = GridToWorld(intXfull);
+
+                    int nIsSet000;
+                    int nIsSet100;
+                    int nIsSet010;
+                    int nIsSet110;
+                    int nIsSet001;
+                    int nIsSet101;
+                    int nIsSet011;
+                    int nIsSet111;
 
 
-                    //if (x > y && y > z)
+                    // Get from generic position.
+
+                    //
+                    // Sync cache.
+                    //
+
+                    if (intZ == 0)
                     {
-                        int nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
-                        int nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
-                        int nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
-                        int nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
-                        int nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
-                        int nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
-                        int nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
-                        int nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
+                        // Case #1: X is 0. Y is 0. Z is 0.
+                        //
+                        // For this case, must compute everything!
+                        nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
+                        nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                        nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                        nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
 
-                        // Don't bother if cube corners are all fully in or fully out.
-                        if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
+                        nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                        nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                        nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+
+                        xcc[intX, intY, xccWL].status = nIsSet001;
+                        xcc[intX + 1, intY, xccWL].status = nIsSet101;
+                        xcc[intX, intY + 1, xccWL].status = nIsSet011;
+
+                    }
+                    else
+                    {
+                        // Get from previous z slice!
+                        nIsSet000 = xcc[intX, intY, xccAL].status;
+                        nIsSet100 = xcc[intX + 1, intY, xccAL].status;
+                        nIsSet010 = xcc[intX, intY + 1, xccAL].status;
+                        nIsSet110 = xcc[intX + 1, intY + 1, xccAL].status;
+                    }
+
+
+                    if (intY == 0)
+                    {
+                        // For this case, must compute new y values!
+                        nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                        nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+
+                        //xcc[intX, intY, xccWL].status = nIsSet001;
+                        //xcc[intX + 1, intY, xccWL].status = nIsSet101;
+
+                    }
+                    else
+                    {
+                        // Get from previous y run!
+                        nIsSet001 = xcc[intX, intY - 1, xccWL].status;
+                        nIsSet101 = xcc[intX + 1, intY - 1, xccWL].status;
+                    }
+
+
+                    if (intX == 0)
+                    {
+                        // For this case, must compute new x values!
+                        nIsSet011 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                    }
+                    else
+                    {
+                        // Get from previous x shot!
+                        nIsSet011 = xcc[intX - 1, intY, xccWL].status;
+                    }
+
+
+
+                    // Compute new vertex for this cube cell. and save to cache.
+                    nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
+
+                    xcc[intX + 1, intY + 1, xccWL].status = nIsSet111;
+
+
+                    // Don't bother if cube corners are all fully in or fully out.
+                    if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
+                    {
+                        Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
+                        Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
+                        Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
+                        Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
+                        Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
+                        Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
+                        Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
+                        Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
+
+
+                        // Show "base" vertex if needed.
+
+                        if (displayVertices)
                         {
-                            Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
-                            Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
-                            Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
-                            Vector3Int v110i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull);
-                            Vector3Int v001i = new Vector3Int(intXfull, intYfull, intZfull + 12);
-                            Vector3Int v101i = new Vector3Int(intXfull + 12, intYfull, intZfull + 12);
-                            Vector3Int v011i = new Vector3Int(intXfull, intYfull + 12, intZfull + 12);
-                            Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
-
-                            // Show "base" vertex if needed.
-                            if (displayVertices && CanFormTriangleVertex(intXfull, intYfull, intZfull) == 0)
-                            {
-                                s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                                s.transform.parent = mfMain.transform;
-
-                                s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
-                                s.transform.localScale = new Vector3(scale, scale, scale);
-
-                                s.GetComponent<Renderer>().material = vertexMaterial;
-                                s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-                                myList.Add(s);
-                            }
-
-
-                            // Flat faces
-
-                            CheckFlatFace(v000i, v010i, v011i, v001i, 0, v010, v001);    // Along x = 0
-                            CheckFlatFace(v000i, v001i, v101i, v100i, 1, v001, v100);    // Along y = 0
-                            CheckFlatFace(v000i, v100i, v110i, v010i, 2, v100, v010);    // Along z = 0
-
-
-                            // Diagonals across faces
-
-                            CheckDiagonalFace(v000i, v100i, v111i, v011i, 3, v100, v011); // Along x
-                            CheckDiagonalFace(v010i, v110i, v101i, v001i, 4, v100, v0m11); // Along x
-
-                            CheckDiagonalFace(v000i, v010i, v111i, v101i, 5, v010, v101); // Along y
-                            CheckDiagonalFace(v001i, v011i, v110i, v100i, 6, v010, v10m1); // Along y
-
-                            CheckDiagonalFace(v000i, v001i, v111i, v110i, 7, v001, v110); // Along z
-                            CheckDiagonalFace(v010i, v011i, v101i, v100i, 8, v001, v1m10); // Along z
-
-
-                            // Corners
-
-                            CheckCornerTriangle(v100i, v010i, v001i, 9, vm110, vm101);   // Around 000
-                            CheckCornerTriangle(v110i, v101i, v011i, 9, v0m11, vm101);   // Around 111
-
-                            CheckCornerTriangle(v000i, v101i, v110i, 10, v101, v110);  // Around 100
-                            CheckCornerTriangle(v111i, v001i, v010i, 10, vm1m10, vm10m1);  // Around 011
-
-                            CheckCornerTriangle(v100i, v111i, v001i, 11, v011, vm101);  // Around 101
-                            CheckCornerTriangle(v110i, v000i, v011i, 11, vm1m10, vm101);  // Around 010
-
-                            CheckCornerTriangle(v101i, v011i, v000i, 12, vm110, vm10m1);  // Around 001
-                            CheckCornerTriangle(v111i, v100i, v010i, 12, v0m1m1, vm10m1);  // Around 110
+                            DrawVertex(intXfull, intYfull, intZfull, x0, y0, z0);
                         }
-                        else
-                        {
-                            nFullyInOrOut++;
-                        }
+
+
+                        // Flat faces
+
+                        CheckFlatFace(v000i, v010i, v011i, v001i, 0, vu010, vu001);    // Along x = 0
+                        CheckFlatFace(v000i, v001i, v101i, v100i, 1, vu001, vu100);    // Along y = 0
+                        CheckFlatFace(v000i, v100i, v110i, v010i, 2, vu100, vu010);    // Along z = 0
+
+
+                        // Diagonals across faces
+
+                        CheckDiagonalFace(v000i, v100i, v111i, v011i, 3, vu100, vu011); // Along x
+                        CheckDiagonalFace(v010i, v110i, v101i, v001i, 4, vu100, vu0m11); // Along x
+
+                        CheckDiagonalFace(v000i, v010i, v111i, v101i, 5, vu010, vu101); // Along y
+                        CheckDiagonalFace(v001i, v011i, v110i, v100i, 6, vu010, vu10m1); // Along y
+
+                        CheckDiagonalFace(v000i, v001i, v111i, v110i, 7, vu001, vu110); // Along z
+                        CheckDiagonalFace(v010i, v011i, v101i, v100i, 8, vu001, vu1m10); // Along z
+
+
+                        // Corners
+
+                        CheckCornerTriangle(v100i, v010i, v001i, 9, vum110, vum101);   // Around 000
+                        CheckCornerTriangle(v110i, v101i, v011i, 9, vu0m11, vum101);   // Around 111
+
+                        CheckCornerTriangle(v000i, v101i, v110i, 10, vu101, vu110);  // Around 100
+                        CheckCornerTriangle(v111i, v001i, v010i, 10, vum1m10, vum10m1);  // Around 011
+
+                        CheckCornerTriangle(v100i, v111i, v001i, 11, vu011, vum101);  // Around 101
+                        CheckCornerTriangle(v110i, v000i, v011i, 11, vum1m10, vum101);  // Around 010
+
+                        CheckCornerTriangle(v101i, v011i, v000i, 12, vum110, vum10m1);  // Around 001
+                        CheckCornerTriangle(v111i, v100i, v010i, 12, vu0m1m1, vum10m1);  // Around 110
+                    }
+                    else
+                    {
+                        nFullyInOrOut++;
                     }
                 }
             }
+
+            // We have done the entire x-y slab.
+            // Now, swap xcc cache, and proceed to next slab in the z direction.
+            int temp = xccAL;
+            xccAL = xccWL;
+            xccWL = temp;
+        }
+    }
+
+
+    // Draw a vertex at the "zero surface", if applicable.
+    public void DrawVertex(int xFull, int yFull, int zFull, float x0, float y0, float z0)
+    {
+        if (CanFormTriangleVertex(xFull, yFull, zFull) == 0)
+        {
+            s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            s.transform.parent = mfMain.transform;
+
+            s.transform.localPosition = new Vector3(x0, y0, z0);
+            s.transform.localScale = new Vector3(scale, scale, scale);
+
+            s.GetComponent<Renderer>().material = vertexMaterial;
+            s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            myList.Add(s);
         }
     }
 
@@ -692,7 +763,7 @@ public class PlayerController : MonoBehaviour
             AddQuadBoth(IntVectorToWorld(v00), IntVectorToWorld(v0C), IntVectorToWorld(vC0), IntVectorToWorld(vCC), mesh);
             nFullFlats++;
         }
-        else
+        else if (in36 == 0 || in69 == 0 || in96 == 0 || in63 == 0)
         {
             // Get the rest of the "points of interest".
             Vector3Int v66 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 6);
@@ -755,7 +826,9 @@ public class PlayerController : MonoBehaviour
             AddQuadBoth(IntVectorToWorld(v000), IntVectorToWorld(v00C), IntVectorToWorld(vCC0), IntVectorToWorld(vCCC), mesh);
             nFullDiagonals++;
         }
-        else
+        else if (in442 == 0 || in334 == 0 || in226 == 0 || in554 == 0 || in446 == 0 || in338 == 0
+            || in558 == 0 || in44A == 0 || in882 == 0 || in994 == 0 || inAA6 == 0 || in774 == 0
+            || in886 == 0 || in998 == 0 || in778 == 0 || in88A == 0)
         {
             // Get the rest of the "points of interest".
             Vector3Int v666 = MixVectors3Int(v000, vu000toCC0, 6, vu000to00C, 6);
@@ -837,7 +910,8 @@ public class PlayerController : MonoBehaviour
             AddTriangleBoth(IntVectorToWorld(v00C), IntVectorToWorld(v0C0), IntVectorToWorld(vC00), mesh);
             nFullCorners++;
         }
-        else
+        else if (in417 == 0 || in147 == 0 || in174 == 0 || in471 == 0 || in741 == 0 || in714 == 0
+            || in435 == 0 || in345 == 0 || in354 == 0 || in453 == 0 || in543 == 0 || in534 == 0)
         {
             // Get the rest of the "points of interest".
             Vector3Int v444 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 4);
