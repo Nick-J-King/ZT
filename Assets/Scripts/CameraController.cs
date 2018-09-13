@@ -9,6 +9,7 @@ public class AzimuthElevation
     public float elevation;
 }
 
+
 public class XYZ
 {
     public float x;
@@ -19,12 +20,15 @@ public class XYZ
 
 public class CameraController : MonoBehaviour {
 
-    public GameObject player;
+    //public GameObject player;
 
     private float RotateAmount = 1.0f;
 
     public AzimuthElevation azimuthElevation;
     public XYZ xyz;
+
+    Ray ray;
+    RaycastHit hit;
 
 
     void Start ()
@@ -41,21 +45,22 @@ public class CameraController : MonoBehaviour {
         SetCameraAzimuthElevation(azimuthElevation);
     }
 
-    /*
-	// Update is called once per frame
-	void LateUpdate () {
-        transform.position = player.transform.position + offset;
-    }*/
-
 
     void LateUpdate()
     {
         OrbitCamera();
     }
 
+
     public void OrbitCamera()
     {
-        bool isCtrlKeyDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit))
+        {
+            print(hit.collider.name);
+        }
+
+        bool isCtrlKeyDown = true; // Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         if (isCtrlKeyDown && Input.GetMouseButton(0))
         {
             azimuthElevation.azimuth += Input.GetAxis("Mouse X") * RotateAmount;
@@ -87,82 +92,4 @@ public class CameraController : MonoBehaviour {
         transform.position = rotatedVector;
         transform.LookAt(new Vector3(0.0f, 0.0f, 0.0f));
     }
-    /*
-
-    //
-    // VARIABLES
-    //
-
-    public float turnSpeed = 4.0f;      // Speed of camera turning when mouse moves in along an axis
-    public float panSpeed = 4.0f;       // Speed of the camera when being panned
-    public float zoomSpeed = 4.0f;      // Speed of the camera going back and forth
-
-    private Vector3 mouseOrigin;    // Position of cursor when mouse dragging starts
-    private bool isPanning;     // Is the camera being panned?
-    private bool isRotating;    // Is the camera being rotated?
-    private bool isZooming;     // Is the camera zooming?
-
-    //
-    // UPDATE
-    //
-
-    void Update()
-    {
-        // Get the left mouse button
-        if (Input.GetMouseButtonDown(0))
-        {
-            // Get mouse origin
-            mouseOrigin = Input.mousePosition;
-            isRotating = true;
-        }
-
-        // Get the right mouse button
-        if (Input.GetMouseButtonDown(1))
-        {
-            // Get mouse origin
-            mouseOrigin = Input.mousePosition;
-            isPanning = true;
-        }
-
-        // Get the middle mouse button
-        if (Input.GetMouseButtonDown(2))
-        {
-            // Get mouse origin
-            mouseOrigin = Input.mousePosition;
-            isZooming = true;
-        }
-
-        // Disable movements on button release
-        if (!Input.GetMouseButton(0)) isRotating = false;
-        if (!Input.GetMouseButton(1)) isPanning = false;
-        if (!Input.GetMouseButton(2)) isZooming = false;
-
-        // Rotate camera along X and Y axis
-        if (isRotating)
-        {
-            Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - mouseOrigin);
-
-            transform.RotateAround(transform.position, transform.right, -pos.y * turnSpeed);
-            transform.RotateAround(transform.position, Vector3.up, pos.x * turnSpeed);
-        }
-
-        // Move the camera on it's XY plane
-        if (isPanning)
-        {
-            Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - mouseOrigin);
-
-            Vector3 move = new Vector3(pos.x * panSpeed, pos.y * panSpeed, 0);
-            transform.Translate(move, Space.Self);
-        }
-
-        // Move the camera linearly along Z axis
-        if (isZooming)
-        {
-            Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - mouseOrigin);
-
-            Vector3 move = pos.y * zoomSpeed * transform.forward;
-            transform.Translate(move, Space.World);
-        }
-    }
-    */
 }
