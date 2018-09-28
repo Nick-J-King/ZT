@@ -14,6 +14,9 @@ public class CellData
 public class PlayerController : MonoBehaviour
 {
     public Material vertexMaterial;
+    public Material vertexMaterialMarkB;
+    public Material vertexMaterialMarkS;
+    public Material vertexMaterialMarkE;
 
     public int nFullFlats;
     public int nFullDiagonals;
@@ -328,8 +331,8 @@ public class PlayerController : MonoBehaviour
         }
 
 
-        DoFullFigure();
-        //DoTestFigure();
+        //DoFullFigure();
+        DoTestFigure();
 
 
         // Now put the list of triangles in each mesh.
@@ -369,7 +372,7 @@ public class PlayerController : MonoBehaviour
         v7 = GridToWorld(nDivisions * 7);
         v8 = GridToWorld(nDivisions * 8);
         v9 = GridToWorld(nDivisions * 9);
-        vA = GridToWorld(nDivisions * 0);
+        vA = GridToWorld(nDivisions * 10);
         vB = GridToWorld(nDivisions * 11);
         vC = GridToWorld(nFullDivisions);
 
@@ -391,12 +394,296 @@ public class PlayerController : MonoBehaviour
         Vector3 v444 = new Vector3(v4, v4, v4);
         Vector3 v844 = new Vector3(v8, v4, v4);
 
+        // z = 0 face -----------------------------------
+
+        // y = 0 edge
+        Vector3 v621 = new Vector3(v6, v2, v1); // B
+        Vector3 v643 = new Vector3(v6, v4, v3); // S
+        Vector3 v432 = new Vector3(v4, v3, v2); // E
+        Vector3 v832 = new Vector3(v8, v3, v2); // E
+
+        DoVertex(v621, vertexMaterialMarkB);
+        DoVertex(v643, vertexMaterialMarkS);
+        DoVertex(v432, vertexMaterialMarkE);
+        DoVertex(v832, vertexMaterialMarkE);
+
+        // y = c edge
+        Vector3 v6A1 = new Vector3(v6, vA, v1); // B
+        Vector3 v683 = new Vector3(v6, v8, v3); // S
+        Vector3 v492 = new Vector3(v4, v9, v2); // E
+        Vector3 v892 = new Vector3(v8, v9, v2); // E
+
+        DoVertex(v6A1, vertexMaterialMarkB);
+        DoVertex(v683, vertexMaterialMarkS);
+        DoVertex(v492, vertexMaterialMarkE);
+        DoVertex(v892, vertexMaterialMarkE);
+
+        // x = 0 edge
+        Vector3 v261 = new Vector3(v2, v6, v1); // B
+        Vector3 v463 = new Vector3(v4, v6, v3); // S
+        Vector3 v342 = new Vector3(v3, v4, v2); // E
+        Vector3 v382 = new Vector3(v3, v8, v2); // E
+
+        DoVertex(v261, vertexMaterialMarkB);
+        DoVertex(v463, vertexMaterialMarkS);
+        DoVertex(v342, vertexMaterialMarkE);
+        DoVertex(v382, vertexMaterialMarkE);
+
+        // x = c edge
+        Vector3 vA61 = new Vector3(vA, v6, v1); // B
+        Vector3 v863 = new Vector3(v8, v6, v3); // S
+        Vector3 v942 = new Vector3(v9, v4, v2); // E
+        Vector3 v982 = new Vector3(v9, v8, v2); // E
+
+        DoVertex(vA61, vertexMaterialMarkB);
+        DoVertex(v863, vertexMaterialMarkS);
+        DoVertex(v942, vertexMaterialMarkE);
+        DoVertex(v982, vertexMaterialMarkE);
+
+        // z = c face -----------------------------------
+
+        // y = 0 edge
+        Vector3 v62B = new Vector3(v6, v2, vB); // B
+        Vector3 v649 = new Vector3(v6, v4, v9); // S
+        Vector3 v43A = new Vector3(v4, v3, vA); // E
+        Vector3 v83A = new Vector3(v8, v3, vA); // E
+
+        DoVertex(v62B, vertexMaterialMarkB);
+        DoVertex(v649, vertexMaterialMarkS);
+        DoVertex(v43A, vertexMaterialMarkE);
+        DoVertex(v83A, vertexMaterialMarkE);
+
+        // y = c edge
+        Vector3 v6AB = new Vector3(v6, vA, vB); // B
+        Vector3 v689 = new Vector3(v6, v8, v9); // S
+        Vector3 v49A = new Vector3(v4, v9, vA); // E
+        Vector3 v89A = new Vector3(v8, v9, vA); // E
+
+        DoVertex(v6AB, vertexMaterialMarkB);
+        DoVertex(v689, vertexMaterialMarkS);
+        DoVertex(v49A, vertexMaterialMarkE);
+        DoVertex(v89A, vertexMaterialMarkE);
+
+        // x = 0 edge
+        Vector3 v26B = new Vector3(v2, v6, vB); // B
+        Vector3 v469 = new Vector3(v4, v6, v9); // S
+        Vector3 v34A = new Vector3(v3, v4, vA); // E
+        Vector3 v38A = new Vector3(v3, v8, vA); // E
+
+        DoVertex(v26B, vertexMaterialMarkB);
+        DoVertex(v469, vertexMaterialMarkS);
+        DoVertex(v34A, vertexMaterialMarkE);
+        DoVertex(v38A, vertexMaterialMarkE);
+
+        // x = c edge
+        Vector3 vA6B = new Vector3(vA, v6, vB); // B
+        Vector3 v869 = new Vector3(v8, v6, v9); // S
+        Vector3 v94A = new Vector3(v9, v4, vA); // E
+        Vector3 v98A = new Vector3(v9, v8, vA); // E
+
+        DoVertex(vA6B, vertexMaterialMarkB);
+        DoVertex(v869, vertexMaterialMarkS);
+        DoVertex(v94A, vertexMaterialMarkE);
+        DoVertex(v98A, vertexMaterialMarkE);
+
+        //--------------------------------------------------
+        //--------------------------------------------------
+
+
+        // y = 0 face -----------------------------------
+
+        // z = 0 edge
+        Vector3 v612 = new Vector3(v6, v1, v2); // B
+        Vector3 v634 = new Vector3(v6, v3, v4); // S
+        Vector3 v423 = new Vector3(v4, v2, v3); // E
+        Vector3 v823 = new Vector3(v8, v2, v3); // E
+
+        DoVertex(v612, vertexMaterialMarkB);
+        DoVertex(v634, vertexMaterialMarkS);
+        DoVertex(v423, vertexMaterialMarkE);
+        DoVertex(v823, vertexMaterialMarkE);
+
+        // z = c edge
+        Vector3 v61A = new Vector3(v6, v1, vA); // B
+        Vector3 v638 = new Vector3(v6, v3, v8); // S
+        Vector3 v429 = new Vector3(v4, v2, v9); // E
+        Vector3 v829 = new Vector3(v8, v2, v9); // E
+
+        DoVertex(v61A, vertexMaterialMarkB);
+        DoVertex(v638, vertexMaterialMarkS);
+        DoVertex(v429, vertexMaterialMarkE);
+        DoVertex(v829, vertexMaterialMarkE);
+
+        // x = 0 edge......
+        Vector3 v216 = new Vector3(v2, v1, v6); // B
+        Vector3 v436 = new Vector3(v4, v3, v6); // S
+        Vector3 v324 = new Vector3(v3, v2, v4); // E
+        Vector3 v328 = new Vector3(v3, v2, v8); // E
+
+        DoVertex(v216, vertexMaterialMarkB);
+        DoVertex(v436, vertexMaterialMarkS);
+        DoVertex(v324, vertexMaterialMarkE);
+        DoVertex(v328, vertexMaterialMarkE);
+
+        // x = c edge
+        Vector3 vA16 = new Vector3(vA, v1, v6); // B
+        Vector3 v836 = new Vector3(v8, v3, v6); // S
+        Vector3 v924 = new Vector3(v9, v2, v4); // E
+        Vector3 v928 = new Vector3(v9, v2, v8); // E
+
+        DoVertex(vA16, vertexMaterialMarkB);
+        DoVertex(v836, vertexMaterialMarkS);
+        DoVertex(v924, vertexMaterialMarkE);
+        DoVertex(v928, vertexMaterialMarkE);
+
+        // y = c face -----------------------------------
+
+        // z = 0 edge
+        Vector3 v6B2 = new Vector3(v6, vB, v2); // B
+        Vector3 v694 = new Vector3(v6, v9, v4); // S
+        Vector3 v4A3 = new Vector3(v4, vA, v3); // E
+        Vector3 v8A3 = new Vector3(v8, vA, v3); // E
+
+        DoVertex(v6B2, vertexMaterialMarkB);
+        DoVertex(v694, vertexMaterialMarkS);
+        DoVertex(v4A3, vertexMaterialMarkE);
+        DoVertex(v8A3, vertexMaterialMarkE);
+
+        // z = c edge
+        Vector3 v6BA = new Vector3(v6, vB, vA); // B
+        Vector3 v698 = new Vector3(v6, v9, v8); // S
+        Vector3 v4A9 = new Vector3(v4, vA, v9); // E
+        Vector3 v8A9 = new Vector3(v8, vA, v9); // E
+
+        DoVertex(v6BA, vertexMaterialMarkB);
+        DoVertex(v698, vertexMaterialMarkS);
+        DoVertex(v4A9, vertexMaterialMarkE);
+        DoVertex(v8A9, vertexMaterialMarkE);
+
+        // x = 0 edge
+        Vector3 v2B6 = new Vector3(v2, vB, v6); // B
+        Vector3 v496 = new Vector3(v4, v9, v6); // S
+        Vector3 v3A4 = new Vector3(v3, vA, v4); // E
+        Vector3 v3A8 = new Vector3(v3, vA, v8); // E
+
+        DoVertex(v2B6, vertexMaterialMarkB);
+        DoVertex(v496, vertexMaterialMarkS);
+        DoVertex(v3A4, vertexMaterialMarkE);
+        DoVertex(v3A8, vertexMaterialMarkE);
+
+        // x = c edge
+        Vector3 vAB6 = new Vector3(vA, vB, v6); // B
+        Vector3 v896 = new Vector3(v8, v9, v6); // S
+        Vector3 v9A4 = new Vector3(v9, vA, v4); // E
+        Vector3 v9A8 = new Vector3(v9, vA, v8); // E
+
+        DoVertex(vAB6, vertexMaterialMarkB);
+        DoVertex(v896, vertexMaterialMarkS);
+        DoVertex(v9A4, vertexMaterialMarkE);
+        DoVertex(v9A8, vertexMaterialMarkE);
+
+        //--------------------------------------------------
+        //--------------------------------------------------
+
+        // x = 0 face -----------------------------------
+
+        // z = 0 edge
+        Vector3 v162 = new Vector3(v1, v6, v2); // B
+        Vector3 v364 = new Vector3(v3, v6, v4); // S
+        Vector3 v243 = new Vector3(v2, v4, v3); // E
+        Vector3 v283 = new Vector3(v2, v8, v3); // E..
+
+        DoVertex(v162, vertexMaterialMarkB);
+        DoVertex(v364, vertexMaterialMarkS);
+        DoVertex(v243, vertexMaterialMarkE);
+        DoVertex(v283, vertexMaterialMarkE);
+
+        // z = c edge
+        Vector3 v16A = new Vector3(v1, v6, vA); // B
+        Vector3 v368 = new Vector3(v3, v6, v8); // S
+        Vector3 v249 = new Vector3(v2, v4, v9); // E
+        Vector3 v289 = new Vector3(v2, v8, v9); // E
+
+        DoVertex(v16A, vertexMaterialMarkB);
+        DoVertex(v368, vertexMaterialMarkS);
+        DoVertex(v249, vertexMaterialMarkE);
+        DoVertex(v289, vertexMaterialMarkE);
+
+        // y = 0 edge......
+        Vector3 v126 = new Vector3(v1, v2, v6); // B
+        Vector3 v346 = new Vector3(v3, v4, v6); // S
+        Vector3 v234 = new Vector3(v2, v3, v4); // E
+        Vector3 v238 = new Vector3(v2, v3, v8); // E
+
+        DoVertex(v126, vertexMaterialMarkB);
+        DoVertex(v346, vertexMaterialMarkS);
+        DoVertex(v234, vertexMaterialMarkE);
+        DoVertex(v238, vertexMaterialMarkE);
+
+        // y = c edge
+        Vector3 v1A6 = new Vector3(v1, vA, v6); // B
+        Vector3 v386 = new Vector3(v3, v8, v6); // S
+        Vector3 v294 = new Vector3(v2, v9, v4); // E
+        Vector3 v298 = new Vector3(v2, v9, v8); // E
+
+        DoVertex(v1A6, vertexMaterialMarkB);
+        DoVertex(v386, vertexMaterialMarkS);
+        DoVertex(v294, vertexMaterialMarkE);
+        DoVertex(v298, vertexMaterialMarkE);
+
+        // x = c face -----------------------------------
+
+        // z = 0 edge
+        Vector3 vB62 = new Vector3(vB, v6, v2); // B
+        Vector3 v964 = new Vector3(v9, v6, v4); // S
+        Vector3 vA43 = new Vector3(vA, v4, v3); // E
+        Vector3 vA83 = new Vector3(vA, v8, v3); // E
+
+        DoVertex(vB62, vertexMaterialMarkB);
+        DoVertex(v964, vertexMaterialMarkS);
+        DoVertex(vA43, vertexMaterialMarkE);
+        DoVertex(vA83, vertexMaterialMarkE);
+
+        // z = c edge
+        Vector3 vB6A = new Vector3(vB, v6, vA); // B
+        Vector3 v968 = new Vector3(v9, v6, v8); // S
+        Vector3 vA49 = new Vector3(vA, v4, v9); // E
+        Vector3 vA89 = new Vector3(vA, v8, v9); // E
+
+        DoVertex(vB6A, vertexMaterialMarkB);
+        DoVertex(v968, vertexMaterialMarkS);
+        DoVertex(vA49, vertexMaterialMarkE);
+        DoVertex(vA89, vertexMaterialMarkE);
+
+        // y = 0 edge
+        Vector3 vB26 = new Vector3(vB, v2, v6); // B
+        Vector3 v946 = new Vector3(v9, v4, v6); // S
+        Vector3 vA34 = new Vector3(vA, v3, v4); // E
+        Vector3 vA38 = new Vector3(vA, v3, v8); // E
+
+        DoVertex(vB26, vertexMaterialMarkB);
+        DoVertex(v946, vertexMaterialMarkS);
+        DoVertex(vA34, vertexMaterialMarkE);
+        DoVertex(vA38, vertexMaterialMarkE);
+
+        // y = c edge
+        Vector3 vBA6 = new Vector3(vB, vA, v6); // B
+        Vector3 v986 = new Vector3(v9, v8, v6); // S
+        Vector3 vA94 = new Vector3(vA, v9, v4); // E
+        Vector3 vA98 = new Vector3(vA, v9, v8); // E
+
+        DoVertex(vBA6, vertexMaterialMarkB);
+        DoVertex(v986, vertexMaterialMarkS);
+        DoVertex(vA94, vertexMaterialMarkE);
+        DoVertex(vA98, vertexMaterialMarkE);
+
+        //--------------------------------------------------
+
 
         AddTriangleBoth(v000, vC00, v666, 1);
 
         AddTriangleBoth(v444, v660, vC00, 1);
         AddTriangleBoth(v000, v660, v844, 1);
-
 
         float x0;
         float y0;
@@ -433,6 +720,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void DoVertex(Vector3 v, Material material)
+    {
+        s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        s.transform.parent = mfMain.transform;
+
+        s.transform.localPosition = v;
+        s.transform.localScale = new Vector3(scale, scale, scale);
+
+        s.GetComponent<Renderer>().material = material;
+        s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+
+        myList.Add(s);
+    }
 
     private void DoFullFigure()
     {

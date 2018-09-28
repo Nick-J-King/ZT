@@ -60,7 +60,7 @@ public class CameraController : MonoBehaviour {
             print(hit.collider.name);
         }
 
-        bool isCtrlKeyDown = true; // Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool isCtrlKeyDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         if (isCtrlKeyDown && Input.GetMouseButton(0))
         {
             azimuthElevation.azimuth += Input.GetAxis("Mouse X") * RotateAmount;
