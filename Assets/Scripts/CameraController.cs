@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class AzimuthElevation
+public struct AzimuthElevation
 {
     public float azimuth;
     public float elevation;
 }
 
 
-public class XYZ
+public struct XYZ
 {
     public float x;
     public float y;
@@ -18,26 +18,19 @@ public class XYZ
 }
 
 
-public class CameraController : MonoBehaviour {
-
-    //public GameObject player;
-
+public class CameraController : MonoBehaviour
+{
     private float RotateAmount = 1.0f;
 
     public AzimuthElevation azimuthElevation;
     public XYZ xyz;
 
-    Ray ray;
-    RaycastHit hit;
-
 
     void Start ()
     {
-        azimuthElevation = new AzimuthElevation();
         azimuthElevation.azimuth = 0.0f;
         azimuthElevation.elevation = 0.0f;
 
-        xyz = new XYZ();
         xyz.x = 0.0f;
         xyz.y = 0.0f;
         xyz.z = 0.0f;
@@ -54,12 +47,6 @@ public class CameraController : MonoBehaviour {
 
     public void OrbitCamera()
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
-            print(hit.collider.name);
-        }
-
         bool isCtrlKeyDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         if (isCtrlKeyDown && Input.GetMouseButton(0))
         {
