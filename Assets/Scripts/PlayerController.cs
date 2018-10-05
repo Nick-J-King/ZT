@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviour
     public Toggle toggleFrame;
     public Toggle toggleClosure;
 
+    public Text textStatus;
 
     public GameObject goFrame;
 
@@ -52,7 +53,9 @@ public class PlayerController : MonoBehaviour
         GetParametersFromControls();
         SetLightFromControls();
 
-        zeroTriangles.ComputeGeometry();
+        int nCellCount = zeroTriangles.ComputeGeometry();
+
+        textStatus.text = nCellCount.ToString();
     }
 
 
@@ -94,7 +97,10 @@ public class PlayerController : MonoBehaviour
         bool changed = GetParametersFromControls();
         if (changed)
         {
-            zeroTriangles.ComputeGeometry();
+            int nCellCount = zeroTriangles.ComputeGeometry();
+
+            textStatus.text = nCellCount.ToString();
+
         }
     }
 
