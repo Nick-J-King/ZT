@@ -189,162 +189,162 @@ public class ZeroTriangles : MonoBehaviour {
         // z = 0 face -----------------------------------
 
         // y = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 621
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 643
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 432
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 832
+        CheckSubCell(xFull + 6, yFull + 2, zFull + 1, ref nSubCellsB);  // 621
+        CheckSubCell(xFull + 6, yFull + 4, zFull + 3, ref nSubCellsS);  // 643
+        CheckSubCell(xFull + 4, yFull + 3, zFull + 2, ref nSubCellsE);  // 432
+        CheckSubCell(xFull + 8, yFull + 3, zFull + 2, ref nSubCellsE);  // 832
 
         // y = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 6A1
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 683
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 492
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 892
+        CheckSubCell(xFull + 6, yFull + 10, zFull + 1, ref nSubCellsB);  // 6A1
+        CheckSubCell(xFull + 6, yFull + 8, zFull + 3, ref nSubCellsS);  // 683
+        CheckSubCell(xFull + 4, yFull + 9, zFull + 2, ref nSubCellsE);  // 492
+        CheckSubCell(xFull + 8, yFull + 9, zFull + 2, ref nSubCellsE);  // 892
 
         // x = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 261
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 463
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 342
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 382
+        CheckSubCell(xFull + 2, yFull + 6, zFull + 1, ref nSubCellsB);  // 261
+        CheckSubCell(xFull + 4, yFull + 6, zFull + 3, ref nSubCellsS);  // 463
+        CheckSubCell(xFull + 3, yFull + 4, zFull + 2, ref nSubCellsE);  // 342
+        CheckSubCell(xFull + 3, yFull + 8, zFull + 2, ref nSubCellsE);  // 382
 
         // x = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // A61
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 863
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 942
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 982
+        CheckSubCell(xFull + 10, yFull + 6, zFull + 1, ref nSubCellsB);  // A61
+        CheckSubCell(xFull + 8, yFull + 6, zFull + 3, ref nSubCellsS);  // 863
+        CheckSubCell(xFull + 9, yFull + 4, zFull + 2, ref nSubCellsE);  // 942
+        CheckSubCell(xFull + 9, yFull + 8, zFull + 2, ref nSubCellsE);  // 982
 
         // z = c face -----------------------------------
 
         // y = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 62B
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 649
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 43A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 83A
+        CheckSubCell(xFull + 6, yFull + 2, zFull + 11, ref nSubCellsB);  // 62B
+        CheckSubCell(xFull + 6, yFull + 4, zFull + 9, ref nSubCellsS);  // 649
+        CheckSubCell(xFull + 4, yFull + 3, zFull + 10, ref nSubCellsE);  // 43A
+        CheckSubCell(xFull + 8, yFull + 3, zFull + 10, ref nSubCellsE);  // 83A
 
         // y = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 6AB
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 689
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 49A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 89A
+        CheckSubCell(xFull + 6, yFull + 10, zFull + 11, ref nSubCellsB);  // 6AB
+        CheckSubCell(xFull + 6, yFull + 8, zFull + 9, ref nSubCellsS);  // 689
+        CheckSubCell(xFull + 4, yFull + 9, zFull + 10, ref nSubCellsE);  // 49A
+        CheckSubCell(xFull + 8, yFull + 9, zFull + 10, ref nSubCellsE);  // 89A
 
         // x = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 26B
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 469
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 34A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 38A
+        CheckSubCell(xFull + 2, yFull + 6, zFull + 11, ref nSubCellsB);  // 26B
+        CheckSubCell(xFull + 4, yFull + 6, zFull + 9, ref nSubCellsS);  // 469
+        CheckSubCell(xFull + 3, yFull + 4, zFull + 10, ref nSubCellsE);  // 34A
+        CheckSubCell(xFull + 3, yFull + 8, zFull + 10, ref nSubCellsE);  // 38A
 
         // x = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // A6B
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 869
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 94A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 98A
+        CheckSubCell(xFull + 10, yFull + 6, zFull + 11, ref nSubCellsB);  // A6B
+        CheckSubCell(xFull + 8, yFull + 6, zFull + 9, ref nSubCellsS);  // 869
+        CheckSubCell(xFull + 9, yFull + 4, zFull + 10, ref nSubCellsE);  // 94A
+        CheckSubCell(xFull + 9, yFull + 8, zFull + 10, ref nSubCellsE);  // 98A
 
 
 
         // y = 0 face -----------------------------------
 
         // z = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 612
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 634
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 423
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 823
+        CheckSubCell(xFull + 6, yFull + 1, zFull + 2, ref nSubCellsB);  // 612
+        CheckSubCell(xFull + 6, yFull + 3, zFull + 4, ref nSubCellsS);  // 634
+        CheckSubCell(xFull + 4, yFull + 2, zFull + 3, ref nSubCellsE);  // 423
+        CheckSubCell(xFull + 8, yFull + 2, zFull + 3, ref nSubCellsE);  // 823
 
         // z = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 61A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 638
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 429
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 829
+        CheckSubCell(xFull + 6, yFull + 1, zFull + 10, ref nSubCellsB);  // 61A
+        CheckSubCell(xFull + 6, yFull + 3, zFull + 8, ref nSubCellsS);  // 638
+        CheckSubCell(xFull + 4, yFull + 2, zFull + 9, ref nSubCellsE);  // 429
+        CheckSubCell(xFull + 8, yFull + 2, zFull + 9, ref nSubCellsE);  // 829
 
         // x = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 216
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 436
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 324
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 328
+        CheckSubCell(xFull + 2, yFull + 1, zFull + 6, ref nSubCellsB);  // 216
+        CheckSubCell(xFull + 4, yFull + 3, zFull + 6, ref nSubCellsS);  // 436
+        CheckSubCell(xFull + 3, yFull + 2, zFull + 4, ref nSubCellsE);  // 324
+        CheckSubCell(xFull + 3, yFull + 2, zFull + 8, ref nSubCellsE);  // 328
 
         // x = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // A16
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 836
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 924
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 928
+        CheckSubCell(xFull + 10, yFull + 1, zFull + 6, ref nSubCellsB);  // A16
+        CheckSubCell(xFull + 8, yFull + 3, zFull + 6, ref nSubCellsS);  // 836
+        CheckSubCell(xFull + 9, yFull + 2, zFull + 4, ref nSubCellsE);  // 924
+        CheckSubCell(xFull + 9, yFull + 2, zFull + 8, ref nSubCellsE);  // 928
 
         // y = c face -----------------------------------
 
         // z = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 6B2
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 694
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 4A3
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 8A3
+        CheckSubCell(xFull + 6, yFull + 11, zFull + 2, ref nSubCellsB);  // 6B2
+        CheckSubCell(xFull + 6, yFull + 9, zFull + 4, ref nSubCellsS);  // 694
+        CheckSubCell(xFull + 4, yFull + 10, zFull + 3, ref nSubCellsE);  // 4A3
+        CheckSubCell(xFull + 8, yFull + 10, zFull + 3, ref nSubCellsE);  // 8A3
 
         // z = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 6BA
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 698
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 4A9
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 8A9
+        CheckSubCell(xFull + 6, yFull + 11, zFull + 10, ref nSubCellsB);  // 6BA
+        CheckSubCell(xFull + 6, yFull + 9, zFull + 8, ref nSubCellsS);  // 698
+        CheckSubCell(xFull + 4, yFull + 10, zFull + 9, ref nSubCellsE);  // 4A9
+        CheckSubCell(xFull + 8, yFull + 10, zFull + 9, ref nSubCellsE);  // 8A9
 
         // x = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 2B6
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 496
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 3A4
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 3A8
+        CheckSubCell(xFull + 2, yFull + 11, zFull + 6, ref nSubCellsB);  // 2B6
+        CheckSubCell(xFull + 4, yFull + 9, zFull + 6, ref nSubCellsS);  // 496
+        CheckSubCell(xFull + 3, yFull + 10, zFull + 4, ref nSubCellsE);  // 3A4
+        CheckSubCell(xFull + 3, yFull + 10, zFull + 8, ref nSubCellsE);  // 3A8
 
         // x = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // AB6
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 896
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 9A4
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 9A8
+        CheckSubCell(xFull + 10, yFull + 11, zFull + 6, ref nSubCellsB);  // AB6
+        CheckSubCell(xFull + 8, yFull + 9, zFull + 6, ref nSubCellsS);  // 896
+        CheckSubCell(xFull + 9, yFull + 10, zFull + 4, ref nSubCellsE);  // 9A4
+        CheckSubCell(xFull + 9, yFull + 10, zFull + 8, ref nSubCellsE);  // 9A8
 
 
 
         // x = 0 face -----------------------------------
 
         // z = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 162
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 364
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 243
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 283
+        CheckSubCell(xFull + 1, yFull + 6, zFull + 2, ref nSubCellsB);  // 162
+        CheckSubCell(xFull + 3, yFull + 6, zFull + 4, ref nSubCellsS);  // 364
+        CheckSubCell(xFull + 2, yFull + 4, zFull + 3, ref nSubCellsE);  // 243
+        CheckSubCell(xFull + 2, yFull + 8, zFull + 3, ref nSubCellsE);  // 283
 
         // z = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 16A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 368
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 249
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 289
+        CheckSubCell(xFull + 1, yFull + 6, zFull + 10, ref nSubCellsB);  // 16A
+        CheckSubCell(xFull + 3, yFull + 6, zFull + 8, ref nSubCellsS);  // 368
+        CheckSubCell(xFull + 2, yFull + 4, zFull + 9, ref nSubCellsE);  // 249
+        CheckSubCell(xFull + 2, yFull + 8, zFull + 9, ref nSubCellsE);  // 289
 
         // y = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 126
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 346
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 234
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 238
+        CheckSubCell(xFull + 1, yFull + 2, zFull + 6, ref nSubCellsB);  // 126
+        CheckSubCell(xFull + 3, yFull + 4, zFull + 6, ref nSubCellsS);  // 346
+        CheckSubCell(xFull + 2, yFull + 3, zFull + 4, ref nSubCellsE);  // 234
+        CheckSubCell(xFull + 2, yFull + 3, zFull + 8, ref nSubCellsE);  // 238
 
         // y = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // 1A6
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 386
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 294
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // 298
+        CheckSubCell(xFull + 1, yFull + 10, zFull + 6, ref nSubCellsB);  // 1A6
+        CheckSubCell(xFull + 3, yFull + 8, zFull + 6, ref nSubCellsS);  // 386
+        CheckSubCell(xFull + 2, yFull + 9, zFull + 4, ref nSubCellsE);  // 294
+        CheckSubCell(xFull + 2, yFull + 9, zFull + 8, ref nSubCellsE);  // 298
 
         // x = c face -----------------------------------
 
         // z = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // B62
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 964
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A43
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A83
+        CheckSubCell(xFull + 11, yFull + 6, zFull + 2, ref nSubCellsB);  // B62
+        CheckSubCell(xFull + 9, yFull + 6, zFull + 4, ref nSubCellsS);  // 964
+        CheckSubCell(xFull + 10, yFull + 4, zFull + 3, ref nSubCellsE);  // A43
+        CheckSubCell(xFull + 10, yFull + 8, zFull + 3, ref nSubCellsE);  // A83
 
         // z = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // B6A
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 968
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A49
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A89
+        CheckSubCell(xFull + 11, yFull + 6, zFull + 10, ref nSubCellsB);  // B6A
+        CheckSubCell(xFull + 9, yFull + 6, zFull + 8, ref nSubCellsS);  // 968
+        CheckSubCell(xFull + 10, yFull + 4, zFull + 9, ref nSubCellsE);  // A49
+        CheckSubCell(xFull + 10, yFull + 8, zFull + 9, ref nSubCellsE);  // A89
 
         // y = 0 edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // B26
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 946
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A34
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A38
+        CheckSubCell(xFull + 11, yFull + 2, zFull + 6, ref nSubCellsB);  // B26
+        CheckSubCell(xFull + 9, yFull + 4, zFull + 6, ref nSubCellsS);  // 946
+        CheckSubCell(xFull + 10, yFull + 3, zFull + 4, ref nSubCellsE);  // A34
+        CheckSubCell(xFull + 10, yFull + 3, zFull + 8, ref nSubCellsE);  // A38
 
         // y = c edge
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsB);  // BA6
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsS);  // 986
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A94
-        CheckSubCell(xFull, yFull, zFull, ref nSubCellsE);  // A98
+        CheckSubCell(xFull + 11, yFull + 10, zFull + 6, ref nSubCellsB);  // BA6
+        CheckSubCell(xFull + 9, yFull + 8, zFull + 6, ref nSubCellsS);  // 986
+        CheckSubCell(xFull + 10, yFull + 9, zFull + 4, ref nSubCellsE);  // A94
+        CheckSubCell(xFull + 10, yFull + 9, zFull + 8, ref nSubCellsE);  // A98
     }
 
 
