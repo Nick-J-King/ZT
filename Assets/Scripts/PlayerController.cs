@@ -53,9 +53,9 @@ public class PlayerController : MonoBehaviour
         GetParametersFromControls();
         SetLightFromControls();
 
-        int nCellCount = zeroTriangles.ComputeGeometry();
+        float volume = zeroTriangles.ComputeGeometry();
 
-        textStatus.text = nCellCount.ToString();
+        textStatus.text = "Volume: " + volume.ToString();
     }
 
 
@@ -97,9 +97,9 @@ public class PlayerController : MonoBehaviour
         bool changed = GetParametersFromControls();
         if (changed)
         {
-            int nCellCount = zeroTriangles.ComputeGeometry();
+            float volume = zeroTriangles.ComputeGeometry();
 
-            textStatus.text = nCellCount.ToString();
+            textStatus.text = "Volume: " + volume.ToString();
 
         }
     }

@@ -143,7 +143,7 @@ public class ZeroTriangles : MonoBehaviour {
     // We have the internal parameters set.
     // Now, compute the geometry of the figure.
    
-    public int ComputeGeometry()
+    public float ComputeGeometry()
     {
         nFullFlats = 0;
         nFullDiagonals = 0;
@@ -177,7 +177,7 @@ public class ZeroTriangles : MonoBehaviour {
             ProcessMesh(i);
         }
 
-        return nCellCount;
+        return CalculateVolume();
 
     }
 
@@ -354,6 +354,18 @@ public class ZeroTriangles : MonoBehaviour {
         {
             typeCount++;
         }
+    }
+
+
+    // Given sub-cell counts, return the volume of the "in".
+    // (For now, use only SubCell counts - then use fullyIn count for speed, etc...)
+    public float CalculateVolume()
+    {
+        int denominator = parameters.nDivisions * parameters.nDivisions * parameters.nDivisions * 144;
+        int numerator = 3 * nSubCellsB + nSubCellsS + nSubCellsE;
+
+        float volume = (float)numerator / (float)denominator;
+        return volume;
     }
 
 
