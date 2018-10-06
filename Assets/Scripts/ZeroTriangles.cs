@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+// Data for main (full) grid cache.
+// These are the "corner" points of the 12 x 12 x 12 cells.
+// Used to quickly skip over full / empty cells.
+// NOTE: 12 x 12 x 12 is necessary and sufficient to compute all possible geometries.
+
 public struct CellData
 {
     public int status;
-    public Vector3 worldCoords;
+    /// public Vector3 worldCoords; >>> NOTE: Not used yet...
 }
 
+
+// Gather the parameters for the Zero Triangles figure.
+// >>> Split off "computed" parameters.
+// >>> RENAME for clarity!
 
 public struct ZeroTriangleParameters
 {
@@ -37,6 +46,9 @@ public struct ZeroTriangleParameters
 }
 
 
+// The main figure to display.
+// Controls the generation and display (as a mesh).
+
 public class ZeroTriangles : MonoBehaviour {
 
     // The parameters for the figure that can be controlled externally...
@@ -48,30 +60,8 @@ public class ZeroTriangles : MonoBehaviour {
     public Material vertexMaterialMarkS;
     public Material vertexMaterialMarkE;
 
-    private int nFullFlats;
-    private int nFullDiagonals;
-    private int nFullCorners;
-    private int nFullyInOrOut;
-
-    // Sub-cell counts.
-    private int nSubCellsB;
-    private int nSubCellsS;
-    private int nSubCellsE;
-
-    private int nCellCount;
-
-
-    // Internal cache for building meshes.
-    private int[] myNumVerts;
-    private int[] myNumTriangles;
-    private List<Vector3>[] myVerts;
-    private List<int>[] myTriangles;
-
-
     // Mesh gameobjects.
     public GameObject mfMain;
-
-    public MeshFilter[] mfSub;  // Point to the 14 "sub meshes"
 
     public MeshFilter mfMain0;
     public MeshFilter mfMain1;
@@ -88,6 +78,31 @@ public class ZeroTriangles : MonoBehaviour {
     public MeshFilter mfMain12;
     public MeshFilter mfMain13;
 
+
+    // PRIVATE members --------------------------
+
+    private int nFullFlats;
+    private int nFullDiagonals;
+    private int nFullCorners;
+    private int nFullyInOrOut;
+
+    // Sub-cell counts.
+    private int nSubCellsB;     // "Big"
+    private int nSubCellsS;     // "Small"
+    private int nSubCellsE;     // "Edge"
+
+    private int nCellCount;
+        // >>> USE later for optimisation...
+
+    // Internal cache for building meshes.
+    private int[] myNumVerts;
+    private int[] myNumTriangles;
+    private List<Vector3>[] myVerts;
+    private List<int>[] myTriangles;
+
+
+    private MeshFilter[] mfSub;  // Point to the 14 "sub meshes" mfMain0 tp mfMain13
+
     private int MAXTVERTS = 65530;
 
     // List of vertex spheres.
@@ -95,7 +110,6 @@ public class ZeroTriangles : MonoBehaviour {
     private ArrayList myList;
 
 
-    
     // Cache the cube corner info for each layer of (x,y) as we move through z
     private CellData[,,] xcc;    // x,y, layer (0,1)
     private int xccAL;
@@ -105,8 +119,6 @@ public class ZeroTriangles : MonoBehaviour {
     // Use this for initialization
     public void Initialise()
     {
-        //parameters = new ZeroTriangleParameters();
-
         // Create the array of meshes.
         mfSub = new MeshFilter[14];
 
@@ -137,6 +149,7 @@ public class ZeroTriangles : MonoBehaviour {
         // Set the basic size of the figure to match the cube frame.
         parameters.size = 10.0f;                            // Size of the "configuration cube".
         parameters.sizeOnTwo = parameters.size / 2.0f;      // Used to center the cube.
+            // >>> FIX!!!
     }
 
 
@@ -145,6 +158,8 @@ public class ZeroTriangles : MonoBehaviour {
    
     public float ComputeGeometry()
     {
+        // Reset all counters...
+
         nFullFlats = 0;
         nFullDiagonals = 0;
         nFullCorners = 0;
@@ -155,6 +170,8 @@ public class ZeroTriangles : MonoBehaviour {
         nSubCellsE = 0;
 
         nCellCount = 0;
+
+        // Clear away all vertices & meshes...
 
         foreach (GameObject s in myList)
         {
@@ -167,8 +184,9 @@ public class ZeroTriangles : MonoBehaviour {
         }
 
 
+        // Construct the main figure.
+
         DoFullFigure();
-        //DoTestFigure();
 
 
         // Now put the list of triangles in each mesh.
@@ -177,12 +195,12 @@ public class ZeroTriangles : MonoBehaviour {
             ProcessMesh(i);
         }
 
-        return CalculateVolume();
-
+        return CalculateVolume();   // Calculate the volume from (cell) counts...
     }
 
 
     // Given the "base" point of the 12 x 12 x 12 cell, count up the types of components "inside".
+
     private void MeasureCell(int xFull, int yFull, int zFull)
     {
 
@@ -348,6 +366,8 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
+    // Do the simple check on given vertex within the sub-cell.
+
     private void CheckSubCell(int s1, int s2, int s3, ref int typeCount)
     {
         if (CanFormTriangleVertex(s1, s2, s3) == 1)
@@ -359,6 +379,7 @@ public class ZeroTriangles : MonoBehaviour {
 
     // Given sub-cell counts, return the volume of the "in".
     // (For now, use only SubCell counts - then use fullyIn count for speed, etc...)
+
     public float CalculateVolume()
     {
         int denominator = parameters.nDivisions * parameters.nDivisions * parameters.nDivisions * 144;
@@ -369,399 +390,12 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
-    private void DoTestFigure()
-    {
-        float v0;
-        float v1;
-        float v2;
-        float v3;
-        float v4;
-        float v5;
-        float v6;
-        float v7;
-        float v8;
-        float v9;
-        float vA;
-        float vB;
-        float vC;
-
-        v0 = GridToWorld(0);
-        v1 = GridToWorld(parameters.nDivisions * 1);
-        v2 = GridToWorld(parameters.nDivisions * 2);
-        v3 = GridToWorld(parameters.nDivisions * 3);
-        v4 = GridToWorld(parameters.nDivisions * 4);
-        v5 = GridToWorld(parameters.nDivisions * 5);
-        v6 = GridToWorld(parameters.nDivisions * 6);
-        v7 = GridToWorld(parameters.nDivisions * 7);
-        v8 = GridToWorld(parameters.nDivisions * 8);
-        v9 = GridToWorld(parameters.nDivisions * 9);
-        vA = GridToWorld(parameters.nDivisions * 10);
-        vB = GridToWorld(parameters.nDivisions * 11);
-        vC = GridToWorld(parameters.nFullDivisions);
-
-
-        Vector3 v000 = new Vector3(v0, v0, v0);
-        Vector3 vC00 = new Vector3(vC, v0, v0);
-        Vector3 v0C0 = new Vector3(v0, vC, v0);
-        Vector3 vCC0 = new Vector3(vC, vC, v0);
-        Vector3 v00C = new Vector3(v0, v0, vC);
-        Vector3 vC0C = new Vector3(vC, v0, vC);
-        Vector3 v0CC = new Vector3(v0, vC, vC);
-        Vector3 vCCC = new Vector3(vC, vC, vC);
-
-        Vector3 v666 = new Vector3(v6, v6, v6);
-
-        Vector3 v660 = new Vector3(v6, v6, v0);
-        Vector3 v600 = new Vector3(v6, v0, v0);
-        Vector3 v633 = new Vector3(v6, v3, v3);
-        Vector3 v444 = new Vector3(v4, v4, v4);
-        Vector3 v844 = new Vector3(v8, v4, v4);
-
-        // z = 0 face -----------------------------------
-
-        // y = 0 edge
-        Vector3 v621 = new Vector3(v6, v2, v1); // B
-        Vector3 v643 = new Vector3(v6, v4, v3); // S
-        Vector3 v432 = new Vector3(v4, v3, v2); // E
-        Vector3 v832 = new Vector3(v8, v3, v2); // E
-
-        DoVertex(v621, vertexMaterialMarkB);
-        DoVertex(v643, vertexMaterialMarkS);
-        DoVertex(v432, vertexMaterialMarkE);
-        DoVertex(v832, vertexMaterialMarkE);
-
-        // y = c edge
-        Vector3 v6A1 = new Vector3(v6, vA, v1); // B
-        Vector3 v683 = new Vector3(v6, v8, v3); // S
-        Vector3 v492 = new Vector3(v4, v9, v2); // E
-        Vector3 v892 = new Vector3(v8, v9, v2); // E
-
-        DoVertex(v6A1, vertexMaterialMarkB);
-        DoVertex(v683, vertexMaterialMarkS);
-        DoVertex(v492, vertexMaterialMarkE);
-        DoVertex(v892, vertexMaterialMarkE);
-
-        // x = 0 edge
-        Vector3 v261 = new Vector3(v2, v6, v1); // B
-        Vector3 v463 = new Vector3(v4, v6, v3); // S
-        Vector3 v342 = new Vector3(v3, v4, v2); // E
-        Vector3 v382 = new Vector3(v3, v8, v2); // E
-
-        DoVertex(v261, vertexMaterialMarkB);
-        DoVertex(v463, vertexMaterialMarkS);
-        DoVertex(v342, vertexMaterialMarkE);
-        DoVertex(v382, vertexMaterialMarkE);
-
-        // x = c edge
-        Vector3 vA61 = new Vector3(vA, v6, v1); // B
-        Vector3 v863 = new Vector3(v8, v6, v3); // S
-        Vector3 v942 = new Vector3(v9, v4, v2); // E
-        Vector3 v982 = new Vector3(v9, v8, v2); // E
-
-        DoVertex(vA61, vertexMaterialMarkB);
-        DoVertex(v863, vertexMaterialMarkS);
-        DoVertex(v942, vertexMaterialMarkE);
-        DoVertex(v982, vertexMaterialMarkE);
-
-        // z = c face -----------------------------------
-
-        // y = 0 edge
-        Vector3 v62B = new Vector3(v6, v2, vB); // B
-        Vector3 v649 = new Vector3(v6, v4, v9); // S
-        Vector3 v43A = new Vector3(v4, v3, vA); // E
-        Vector3 v83A = new Vector3(v8, v3, vA); // E
-
-        DoVertex(v62B, vertexMaterialMarkB);
-        DoVertex(v649, vertexMaterialMarkS);
-        DoVertex(v43A, vertexMaterialMarkE);
-        DoVertex(v83A, vertexMaterialMarkE);
-
-        // y = c edge
-        Vector3 v6AB = new Vector3(v6, vA, vB); // B
-        Vector3 v689 = new Vector3(v6, v8, v9); // S
-        Vector3 v49A = new Vector3(v4, v9, vA); // E
-        Vector3 v89A = new Vector3(v8, v9, vA); // E
-
-        DoVertex(v6AB, vertexMaterialMarkB);
-        DoVertex(v689, vertexMaterialMarkS);
-        DoVertex(v49A, vertexMaterialMarkE);
-        DoVertex(v89A, vertexMaterialMarkE);
-
-        // x = 0 edge
-        Vector3 v26B = new Vector3(v2, v6, vB); // B
-        Vector3 v469 = new Vector3(v4, v6, v9); // S
-        Vector3 v34A = new Vector3(v3, v4, vA); // E
-        Vector3 v38A = new Vector3(v3, v8, vA); // E
-
-        DoVertex(v26B, vertexMaterialMarkB);
-        DoVertex(v469, vertexMaterialMarkS);
-        DoVertex(v34A, vertexMaterialMarkE);
-        DoVertex(v38A, vertexMaterialMarkE);
-
-        // x = c edge
-        Vector3 vA6B = new Vector3(vA, v6, vB); // B
-        Vector3 v869 = new Vector3(v8, v6, v9); // S
-        Vector3 v94A = new Vector3(v9, v4, vA); // E
-        Vector3 v98A = new Vector3(v9, v8, vA); // E
-
-        DoVertex(vA6B, vertexMaterialMarkB);
-        DoVertex(v869, vertexMaterialMarkS);
-        DoVertex(v94A, vertexMaterialMarkE);
-        DoVertex(v98A, vertexMaterialMarkE);
-
-        //--------------------------------------------------
-        //--------------------------------------------------
-
-
-        // y = 0 face -----------------------------------
-
-        // z = 0 edge
-        Vector3 v612 = new Vector3(v6, v1, v2); // B
-        Vector3 v634 = new Vector3(v6, v3, v4); // S
-        Vector3 v423 = new Vector3(v4, v2, v3); // E
-        Vector3 v823 = new Vector3(v8, v2, v3); // E
-
-        DoVertex(v612, vertexMaterialMarkB);
-        DoVertex(v634, vertexMaterialMarkS);
-        DoVertex(v423, vertexMaterialMarkE);
-        DoVertex(v823, vertexMaterialMarkE);
-
-        // z = c edge
-        Vector3 v61A = new Vector3(v6, v1, vA); // B
-        Vector3 v638 = new Vector3(v6, v3, v8); // S
-        Vector3 v429 = new Vector3(v4, v2, v9); // E
-        Vector3 v829 = new Vector3(v8, v2, v9); // E
-
-        DoVertex(v61A, vertexMaterialMarkB);
-        DoVertex(v638, vertexMaterialMarkS);
-        DoVertex(v429, vertexMaterialMarkE);
-        DoVertex(v829, vertexMaterialMarkE);
-
-        // x = 0 edge......
-        Vector3 v216 = new Vector3(v2, v1, v6); // B
-        Vector3 v436 = new Vector3(v4, v3, v6); // S
-        Vector3 v324 = new Vector3(v3, v2, v4); // E
-        Vector3 v328 = new Vector3(v3, v2, v8); // E
-
-        DoVertex(v216, vertexMaterialMarkB);
-        DoVertex(v436, vertexMaterialMarkS);
-        DoVertex(v324, vertexMaterialMarkE);
-        DoVertex(v328, vertexMaterialMarkE);
-
-        // x = c edge
-        Vector3 vA16 = new Vector3(vA, v1, v6); // B
-        Vector3 v836 = new Vector3(v8, v3, v6); // S
-        Vector3 v924 = new Vector3(v9, v2, v4); // E
-        Vector3 v928 = new Vector3(v9, v2, v8); // E
-
-        DoVertex(vA16, vertexMaterialMarkB);
-        DoVertex(v836, vertexMaterialMarkS);
-        DoVertex(v924, vertexMaterialMarkE);
-        DoVertex(v928, vertexMaterialMarkE);
-
-        // y = c face -----------------------------------
-
-        // z = 0 edge
-        Vector3 v6B2 = new Vector3(v6, vB, v2); // B
-        Vector3 v694 = new Vector3(v6, v9, v4); // S
-        Vector3 v4A3 = new Vector3(v4, vA, v3); // E
-        Vector3 v8A3 = new Vector3(v8, vA, v3); // E
-
-        DoVertex(v6B2, vertexMaterialMarkB);
-        DoVertex(v694, vertexMaterialMarkS);
-        DoVertex(v4A3, vertexMaterialMarkE);
-        DoVertex(v8A3, vertexMaterialMarkE);
-
-        // z = c edge
-        Vector3 v6BA = new Vector3(v6, vB, vA); // B
-        Vector3 v698 = new Vector3(v6, v9, v8); // S
-        Vector3 v4A9 = new Vector3(v4, vA, v9); // E
-        Vector3 v8A9 = new Vector3(v8, vA, v9); // E
-
-        DoVertex(v6BA, vertexMaterialMarkB);
-        DoVertex(v698, vertexMaterialMarkS);
-        DoVertex(v4A9, vertexMaterialMarkE);
-        DoVertex(v8A9, vertexMaterialMarkE);
-
-        // x = 0 edge
-        Vector3 v2B6 = new Vector3(v2, vB, v6); // B
-        Vector3 v496 = new Vector3(v4, v9, v6); // S
-        Vector3 v3A4 = new Vector3(v3, vA, v4); // E
-        Vector3 v3A8 = new Vector3(v3, vA, v8); // E
-
-        DoVertex(v2B6, vertexMaterialMarkB);
-        DoVertex(v496, vertexMaterialMarkS);
-        DoVertex(v3A4, vertexMaterialMarkE);
-        DoVertex(v3A8, vertexMaterialMarkE);
-
-        // x = c edge
-        Vector3 vAB6 = new Vector3(vA, vB, v6); // B
-        Vector3 v896 = new Vector3(v8, v9, v6); // S
-        Vector3 v9A4 = new Vector3(v9, vA, v4); // E
-        Vector3 v9A8 = new Vector3(v9, vA, v8); // E
-
-        DoVertex(vAB6, vertexMaterialMarkB);
-        DoVertex(v896, vertexMaterialMarkS);
-        DoVertex(v9A4, vertexMaterialMarkE);
-        DoVertex(v9A8, vertexMaterialMarkE);
-
-        //--------------------------------------------------
-        //--------------------------------------------------
-
-        // x = 0 face -----------------------------------
-
-        // z = 0 edge
-        Vector3 v162 = new Vector3(v1, v6, v2); // B
-        Vector3 v364 = new Vector3(v3, v6, v4); // S
-        Vector3 v243 = new Vector3(v2, v4, v3); // E
-        Vector3 v283 = new Vector3(v2, v8, v3); // E..
-
-        DoVertex(v162, vertexMaterialMarkB);
-        DoVertex(v364, vertexMaterialMarkS);
-        DoVertex(v243, vertexMaterialMarkE);
-        DoVertex(v283, vertexMaterialMarkE);
-
-        // z = c edge
-        Vector3 v16A = new Vector3(v1, v6, vA); // B
-        Vector3 v368 = new Vector3(v3, v6, v8); // S
-        Vector3 v249 = new Vector3(v2, v4, v9); // E
-        Vector3 v289 = new Vector3(v2, v8, v9); // E
-
-        DoVertex(v16A, vertexMaterialMarkB);
-        DoVertex(v368, vertexMaterialMarkS);
-        DoVertex(v249, vertexMaterialMarkE);
-        DoVertex(v289, vertexMaterialMarkE);
-
-        // y = 0 edge......
-        Vector3 v126 = new Vector3(v1, v2, v6); // B
-        Vector3 v346 = new Vector3(v3, v4, v6); // S
-        Vector3 v234 = new Vector3(v2, v3, v4); // E
-        Vector3 v238 = new Vector3(v2, v3, v8); // E
-
-        DoVertex(v126, vertexMaterialMarkB);
-        DoVertex(v346, vertexMaterialMarkS);
-        DoVertex(v234, vertexMaterialMarkE);
-        DoVertex(v238, vertexMaterialMarkE);
-
-        // y = c edge
-        Vector3 v1A6 = new Vector3(v1, vA, v6); // B
-        Vector3 v386 = new Vector3(v3, v8, v6); // S
-        Vector3 v294 = new Vector3(v2, v9, v4); // E
-        Vector3 v298 = new Vector3(v2, v9, v8); // E
-
-        DoVertex(v1A6, vertexMaterialMarkB);
-        DoVertex(v386, vertexMaterialMarkS);
-        DoVertex(v294, vertexMaterialMarkE);
-        DoVertex(v298, vertexMaterialMarkE);
-
-        // x = c face -----------------------------------
-
-        // z = 0 edge
-        Vector3 vB62 = new Vector3(vB, v6, v2); // B
-        Vector3 v964 = new Vector3(v9, v6, v4); // S
-        Vector3 vA43 = new Vector3(vA, v4, v3); // E
-        Vector3 vA83 = new Vector3(vA, v8, v3); // E
-
-        DoVertex(vB62, vertexMaterialMarkB);
-        DoVertex(v964, vertexMaterialMarkS);
-        DoVertex(vA43, vertexMaterialMarkE);
-        DoVertex(vA83, vertexMaterialMarkE);
-
-        // z = c edge
-        Vector3 vB6A = new Vector3(vB, v6, vA); // B
-        Vector3 v968 = new Vector3(v9, v6, v8); // S
-        Vector3 vA49 = new Vector3(vA, v4, v9); // E
-        Vector3 vA89 = new Vector3(vA, v8, v9); // E
-
-        DoVertex(vB6A, vertexMaterialMarkB);
-        DoVertex(v968, vertexMaterialMarkS);
-        DoVertex(vA49, vertexMaterialMarkE);
-        DoVertex(vA89, vertexMaterialMarkE);
-
-        // y = 0 edge
-        Vector3 vB26 = new Vector3(vB, v2, v6); // B
-        Vector3 v946 = new Vector3(v9, v4, v6); // S
-        Vector3 vA34 = new Vector3(vA, v3, v4); // E
-        Vector3 vA38 = new Vector3(vA, v3, v8); // E
-
-        DoVertex(vB26, vertexMaterialMarkB);
-        DoVertex(v946, vertexMaterialMarkS);
-        DoVertex(vA34, vertexMaterialMarkE);
-        DoVertex(vA38, vertexMaterialMarkE);
-
-        // y = c edge
-        Vector3 vBA6 = new Vector3(vB, vA, v6); // B
-        Vector3 v986 = new Vector3(v9, v8, v6); // S
-        Vector3 vA94 = new Vector3(vA, v9, v4); // E
-        Vector3 vA98 = new Vector3(vA, v9, v8); // E
-
-        DoVertex(vBA6, vertexMaterialMarkB);
-        DoVertex(v986, vertexMaterialMarkS);
-        DoVertex(vA94, vertexMaterialMarkE);
-        DoVertex(vA98, vertexMaterialMarkE);
-
-        //--------------------------------------------------
-
-
-        AddTriangleBoth(v000, vC00, v666, 1);
-
-        AddTriangleBoth(v444, v660, vC00, 1);
-        AddTriangleBoth(v000, v660, v844, 1);
-
-        float x0;
-        float y0;
-        float z0;
-
-        for (int intX = 0; intX <= parameters.nDivisions; intX++)
-        {
-            int intXfull = intX * 12;
-            x0 = GridToWorld(intXfull);
-
-            for (int intY = 0; intY <= parameters.nDivisions; intY++)
-            {
-                int intYfull = intY * 12;
-                y0 = GridToWorld(intYfull);
-
-                for (int intZ = 0; intZ <= parameters.nDivisions; intZ++)
-                {
-                    int intZfull = intZ * 12;
-                    z0 = GridToWorld(intZfull);
-
-                    s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    s.transform.parent = mfMain.transform;
-
-                    s.transform.localPosition = new Vector3(x0, y0, z0);    // v000;
-                    s.transform.localScale = new Vector3(parameters.scale, parameters.scale, parameters.scale);
-
-                    s.GetComponent<Renderer>().material = vertexMaterial;
-                    s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-
-                    myList.Add(s);
-                }
-            }
-        }
-    }
-
-
-    private void DoVertex(Vector3 v, Material material)
-    {
-        s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        s.transform.parent = mfMain.transform;
-
-        s.transform.localPosition = v;
-        s.transform.localScale = new Vector3(parameters.scale, parameters.scale, parameters.scale);
-
-        s.GetComponent<Renderer>().material = material;
-        s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-
-        myList.Add(s);
-    }
-
+    // Construct the "Zero Triangles" figure...
 
     private void DoFullFigure()
     {
+        // First, construct the "base" vectors.
+
         Vector3Int vu100 = new Vector3Int(1, 0, 0);
         Vector3Int vu010 = new Vector3Int(0, 1, 0);
         Vector3Int vu001 = new Vector3Int(0, 0, 1);
@@ -781,6 +415,9 @@ public class ZeroTriangles : MonoBehaviour {
         Vector3Int vum1m10 = new Vector3Int(-1, -1, 0);
         Vector3Int vum10m1 = new Vector3Int(-1, 0, -1);
 
+
+        // Clear the cache...
+
         xcc = new CellData[parameters.nDivisions + 2, parameters.nDivisions + 2, 2];
 
         for (int a = 0; a <= parameters.nDivisions + 1; a++)
@@ -792,6 +429,8 @@ public class ZeroTriangles : MonoBehaviour {
             }
         }
 
+        // Set the "swappping" cache pointers.
+
         xccAL = 0;
         xccWL = 1;
 
@@ -799,6 +438,9 @@ public class ZeroTriangles : MonoBehaviour {
         float x0;
         float y0;
         float z0;
+
+
+        // NOW, go through each cell...
 
         for (int intZ = 0; intZ <= parameters.nDivisions; intZ++)
         {
@@ -963,8 +605,10 @@ public class ZeroTriangles : MonoBehaviour {
                 }
             }
 
+
             // We have done the entire x-y slab.
             // Now, swap xcc cache, and proceed to next slab in the z direction.
+
             int temp = xccAL;
             xccAL = xccWL;
             xccWL = temp;
@@ -973,6 +617,7 @@ public class ZeroTriangles : MonoBehaviour {
 
 
     // Draw a vertex at the "zero surface", if applicable.
+
     public void DrawVertex(int xFull, int yFull, int zFull, float x0, float y0, float z0)
     {
         if (CanFormTriangleVertex(xFull, yFull, zFull) == 0)
@@ -1071,9 +716,11 @@ public class ZeroTriangles : MonoBehaviour {
     // Check the "outer" faces of the cubic lattice.
     // Here, we assume the vertex vectors are in steps of 12.
     // This allows perfect integer arithmetic to determine "zero-triangularity".
+
     public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int mesh, Vector3Int vu00to0C, Vector3Int vu00toC0)
     {
         // "Middle" points.
+
         Vector3Int v36 = MixVectors3Int(v00, vu00toC0, 3, vu00to0C, 6);
         Vector3Int v69 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 9);
         Vector3Int v96 = MixVectors3Int(v00, vu00toC0, 9, vu00to0C, 6);
@@ -1094,11 +741,13 @@ public class ZeroTriangles : MonoBehaviour {
         else if (in36 == 0 || in69 == 0 || in96 == 0 || in63 == 0)
         {
             // Get the rest of the "points of interest".
+
             Vector3Int v66 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 6);
 
             // Form triangles where possible.
             // The last test is for the "internal" point.
             // Go clockwise...
+
             CheckPrimitiveTriangle(v00, v66, vC0, in63, mesh);
             CheckPrimitiveTriangle(v00, v0C, v66, in36, mesh);
             CheckPrimitiveTriangle(v0C, vCC, v66, in69, mesh);
@@ -1106,10 +755,12 @@ public class ZeroTriangles : MonoBehaviour {
         }
     }
 
+
     // Check the "diagonal" rectangles of the cubic lattice.
     public void CheckDiagonalFace(Vector3Int v000, Vector3Int v00C, Vector3Int vCCC, Vector3Int vCC0, int mesh, Vector3Int vu000to00C, Vector3Int vu000toCC0)
     {
         // "Middle" points.
+
         Vector3Int v442 = MixVectors3Int(v000, vu000toCC0, 4, vu000to00C, 2);
         Vector3Int v334 = MixVectors3Int(v000, vu000toCC0, 3, vu000to00C, 4);
         Vector3Int v226 = MixVectors3Int(v000, vu000toCC0, 2, vu000to00C, 6);
@@ -1126,6 +777,7 @@ public class ZeroTriangles : MonoBehaviour {
         Vector3Int v998 = MixVectors3Int(v000, vu000toCC0, 9, vu000to00C, 8);
         Vector3Int v778 = MixVectors3Int(v000, vu000toCC0, 7, vu000to00C, 8);
         Vector3Int v88A = MixVectors3Int(v000, vu000toCC0, 8, vu000to00C, 10);
+
 
         // Get the status of the middle points.
 
@@ -1200,9 +852,11 @@ public class ZeroTriangles : MonoBehaviour {
 
 
     // Check the "corner" triangles of the cubic lattice.
+
     public void CheckCornerTriangle(Vector3Int v00C, Vector3Int v0C0, Vector3Int vC00, int mesh, Vector3Int vu00Cto0C0, Vector3Int vu00CtoC00)
     {
         // "Middle" points.
+
         Vector3Int v417 = MixVectors3Int(v00C, vu00CtoC00, 4, vu00Cto0C0, 1);  // 0
         Vector3Int v147 = MixVectors3Int(v00C, vu00CtoC00, 1, vu00Cto0C0, 4);  // 1
         Vector3Int v174 = MixVectors3Int(v00C, vu00CtoC00, 1, vu00Cto0C0, 7);  // 2
@@ -1253,6 +907,7 @@ public class ZeroTriangles : MonoBehaviour {
             // Form triangles where possible.
             // The last test is for the "internal" point.
             // Go clockwise...
+
             CheckPrimitiveTriangle(v00C, v336, v606, in417, mesh);             // 0
             CheckPrimitiveTriangle(v00C, v066, v336, in147, mesh);             // 1
             CheckPrimitiveTriangle(v066, v0C0, v363, in174, mesh);             // 2
@@ -1269,6 +924,10 @@ public class ZeroTriangles : MonoBehaviour {
         }
     }
 
+
+    //
+    // Mesh utils...
+    //
 
     public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
@@ -1330,8 +989,9 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
-    //-----------------------------------------------------
-
+    //
+    // "Zero triangle" test utils...
+    //
 
     public int CanFormTriangle(Vector3Int v)
     {
@@ -1511,5 +1171,4 @@ public class ZeroTriangles : MonoBehaviour {
 
         return -1;
     }
-
 }
