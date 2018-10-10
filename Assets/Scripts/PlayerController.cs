@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     // The main figure...
     public ZeroTriangles zeroTriangles;
 
+    public PanelStatusController panelStatus;
+
     // Controls on panel.
     public Text textDivisions;
     public Slider sliderDivisions;
@@ -42,7 +44,7 @@ public class PlayerController : MonoBehaviour
     // External game objects.
     public Light directionalLight;
 
-    public CameraController mainCamController;
+    public MainCamera mainCamController;
     public Camera mainCam;
 
 
@@ -53,9 +55,37 @@ public class PlayerController : MonoBehaviour
         GetParametersFromControls();
         SetLightFromControls();
 
-        float volume = zeroTriangles.ComputeGeometry();
+        ComputeGeometryAndGetStats();
+    }
 
-        textStatus.text = "Volume: " + volume.ToString();
+
+    void ComputeGeometryAndGetStats()
+    {
+        float volume = zeroTriangles.ComputeGeometry();
+        ZeroTriangleStats stats = zeroTriangles.GetStats();
+
+        panelStatus.textFullFlats.text = "Full flats: " + stats.nFullFlats.ToString();
+        panelStatus.textFullDiagonals.text = "Full diagonals: " + stats.nFullDiagonals.ToString();
+        panelStatus.textFullCorners.text = "Full corners: " + stats.nFullCorners.ToString();
+
+        panelStatus.textPartialFlats.text = "Partial flats: " + stats.nPartialFlats.ToString();
+        panelStatus.textPartialDiagonals.text = "Partial diagonals: " + stats.nPartialDiagonals.ToString();
+        panelStatus.textPartialCorners.text = "Partial corners: " + stats.nPartialCorners.ToString();
+
+        panelStatus.textSubCellsB.text = "SubCellsB : " + stats.nSubCellsB.ToString();
+        panelStatus.textSubCellsS.text = "SubCellsS : " + stats.nSubCellsS.ToString();
+        panelStatus.textSubCellsE.text = "SubCellsE : " + stats.nSubCellsE.ToString();
+
+        panelStatus.textFullyIn.text = "Fully in: " + stats.nFullyIn.ToString();
+        panelStatus.textFullyOut.text = "Fully out: " + stats.nFullyOut.ToString();
+        panelStatus.textMeasured.text = "Measured: " + stats.nMeasured.ToString();
+        panelStatus.textCellCount.text = "Cell count: " + stats.nCellCount.ToString();
+    
+        panelStatus.textVolume.text = "Volume: " + stats.fVolume.ToString();
+
+        panelStatus.textTimePerFigure.text = "Time: " + stats.fTimePerFigure.ToString();
+        panelStatus.textTimePerCell.text = "Time/cell: " + stats.fTimePerCell.ToString();
+
     }
 
 
@@ -97,10 +127,7 @@ public class PlayerController : MonoBehaviour
         bool changed = GetParametersFromControls();
         if (changed)
         {
-            float volume = zeroTriangles.ComputeGeometry();
-
-            textStatus.text = "Volume: " + volume.ToString();
-
+            ComputeGeometryAndGetStats();
         }
     }
 
@@ -163,6 +190,7 @@ public class PlayerController : MonoBehaviour
 
         // Internal parameters.
         zeroTriangles.parameters.nFullDivisions = zeroTriangles.parameters.nDivisions * 12;
+
         if (zeroTriangles.parameters.sliderFullInt != sliderInt * 12)
         {
             zeroTriangles.parameters.sliderFullInt = sliderInt * 12;

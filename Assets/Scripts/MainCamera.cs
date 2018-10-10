@@ -18,7 +18,7 @@ public struct XYZ
 }
 
 
-public class CameraController : MonoBehaviour
+public class MainCamera : MonoBehaviour
 {
     private float RotateAmount = 1.0f;
 

@@ -46,6 +46,36 @@ public struct ZeroTriangleParameters
 }
 
 
+// Public struct stats
+public struct ZeroTriangleStats
+{
+    public int nFullFlats;
+    public int nFullDiagonals;
+    public int nFullCorners;
+
+    public int nPartialFlats;
+    public int nPartialDiagonals;
+    public int nPartialCorners;
+
+
+    // Cell counts.
+    public int nSubCellsB;     // "Big"
+    public int nSubCellsS;     // "Small"
+    public int nSubCellsE;     // "Edge"
+
+    public int nFullyIn;
+    public int nFullyOut;
+
+    public int nMeasured;
+    public int nCellCount;
+
+    public float fVolume;
+    public float fTimePerFigure;
+    public float fTimePerCell;
+}
+
+
+
 // The main figure to display.
 // Controls the generation and display (as a mesh).
 
@@ -53,6 +83,8 @@ public class ZeroTriangles : MonoBehaviour {
 
     // The parameters for the figure that can be controlled externally...
     public ZeroTriangleParameters parameters;
+
+    public ZeroTriangleStats stats;
 
     // Materials.
     public Material vertexMaterial;
@@ -80,20 +112,27 @@ public class ZeroTriangles : MonoBehaviour {
 
 
     // PRIVATE members --------------------------
-
+    /*
     private int nFullFlats;
     private int nFullDiagonals;
     private int nFullCorners;
-    private int nFullyInOrOut;
+
+    private int nPartialFlats;
+    private int nPartialDiagonals;
+    private int nPartialCorners;
+
 
     // Sub-cell counts.
     private int nSubCellsB;     // "Big"
     private int nSubCellsS;     // "Small"
     private int nSubCellsE;     // "Edge"
 
-    private int nCellCount;
-        // >>> USE later for optimisation...
+    private int nFullyIn;
+    private int nFullyOut;
 
+    private int nMeasured;
+    private int nCellCount;
+*/
     // Internal cache for building meshes.
     private int[] myNumVerts;
     private int[] myNumTriangles;
@@ -115,6 +154,10 @@ public class ZeroTriangles : MonoBehaviour {
     private int xccAL;
     private int xccWL;
 
+    public ZeroTriangleStats GetStats()
+    {
+        return stats;
+    }
 
     // Use this for initialization
     public void Initialise()
@@ -158,18 +201,27 @@ public class ZeroTriangles : MonoBehaviour {
    
     public float ComputeGeometry()
     {
+
+        float start = Time.realtimeSinceStartup;
+
         // Reset all counters...
 
-        nFullFlats = 0;
-        nFullDiagonals = 0;
-        nFullCorners = 0;
-        nFullyInOrOut = 0;
+        stats.nFullFlats = 0;
+        stats.nFullDiagonals = 0;
+        stats.nFullCorners = 0;
 
-        nSubCellsB = 0;
-        nSubCellsS = 0;
-        nSubCellsE = 0;
+        stats.nPartialFlats = 0;
+        stats.nPartialDiagonals = 0;
+        stats.nPartialCorners = 0;
 
-        nCellCount = 0;
+        stats.nSubCellsB = 0;
+        stats.nSubCellsS = 0;
+        stats.nSubCellsE = 0;
+
+        stats.nFullyIn = 0;
+        stats.nFullyOut = 0;
+        stats.nMeasured = 0;
+        stats.nCellCount = 0;
 
         // Clear away all vertices & meshes...
 
@@ -195,13 +247,27 @@ public class ZeroTriangles : MonoBehaviour {
             ProcessMesh(i);
         }
 
-        return CalculateVolume();   // Calculate the volume from (cell) counts...
+        float elapsed = Time.realtimeSinceStartup - start;
+        Debug.Log("elapsed: " + elapsed.ToString());
+
+        stats.fTimePerFigure = elapsed;
+        stats.fTimePerCell = elapsed / stats.nCellCount;
+
+        float vol = CalculateVolume();   // Calculate the volume from (cell) counts...
+        stats.fVolume = vol;
+
+        return vol;
     }
 
 
     // Given the "base" point of the 12 x 12 x 12 cell, count up the types of components "inside".
+    // If the volume is completely full, there should be:
+    //      4 * 6 "1/2 of a 24th"s  (Big pyramid)
+    //      4 * 6 "1/6 of a 24th"s. (Small kite shape)
+    //  2 * 4 * 6 "1/6 of a 24th"s. ("Edge pyramids")
+    // For a complete 1 volume unit.
 
-    private void MeasureCell(int xFull, int yFull, int zFull)
+    private void MeasureCell(int xFull, int yFull, int zFull, ref int nSubCellsB, ref int nSubCellsS, ref int nSubCellsE)
     {
 
         // z = 0 face -----------------------------------
@@ -367,6 +433,7 @@ public class ZeroTriangles : MonoBehaviour {
 
 
     // Do the simple check on given vertex within the sub-cell.
+    // This is here to add up the volume of possible triangles of the "config cube".
 
     private void CheckSubCell(int s1, int s2, int s3, ref int typeCount)
     {
@@ -383,7 +450,7 @@ public class ZeroTriangles : MonoBehaviour {
     public float CalculateVolume()
     {
         int denominator = parameters.nDivisions * parameters.nDivisions * parameters.nDivisions * 144;
-        int numerator = 3 * nSubCellsB + nSubCellsS + nSubCellsE;
+        int numerator = 3 * stats.nSubCellsB + stats.nSubCellsS + stats.nSubCellsE + 144 * stats.nFullyIn;
 
         float volume = (float)numerator / (float)denominator;
         return volume;
@@ -458,7 +525,8 @@ public class ZeroTriangles : MonoBehaviour {
                 {
                     int intXfull = intX * 12;
 
-                    MeasureCell(intXfull, intYfull, intZfull);
+                    stats.nCellCount++;
+                    /// >>>  MeasureCell(intXfull, intYfull, intZfull);
 
                     x0 = GridToWorld(intXfull);
 
@@ -538,15 +606,19 @@ public class ZeroTriangles : MonoBehaviour {
 
 
 
-                    // Compute new vertex for this cube cell. and save to cache.
+                    // Compute last new vertex for this cube cell.
                     nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
 
+                    // Save to cache
                     xcc[intX + 1, intY + 1, xccWL].status = nIsSet111;
 
 
                     // Don't bother if cube corners are all fully in or fully out.
                     if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
                     {
+                        stats.nMeasured++;
+                        MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
+
                         Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
                         Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
                         Vector3Int v010i = new Vector3Int(intXfull, intYfull + 12, intZfull);
@@ -557,7 +629,7 @@ public class ZeroTriangles : MonoBehaviour {
                         Vector3Int v111i = new Vector3Int(intXfull + 12, intYfull + 12, intZfull + 12);
 
 
-                        // Show "base" vertex if needed.
+                        // Show "base" vertex v000 if needed.
 
                         if (parameters.displayVertices)
                         {
@@ -598,9 +670,14 @@ public class ZeroTriangles : MonoBehaviour {
                         CheckCornerTriangle(v101i, v011i, v000i, 12, vum110, vum10m1);  // Around 001
                         CheckCornerTriangle(v111i, v100i, v010i, 12, vu0m1m1, vum10m1);  // Around 110
                     }
+                    else if (nIsSet000 == 1 && nIsSet100 == 1 && nIsSet010 == 1 && nIsSet110 == 1 && nIsSet001 == 1 && nIsSet101 == 1 && nIsSet011 == 1 && nIsSet111 == 1)
+                    {
+
+                        stats.nFullyIn++;
+                    }
                     else
                     {
-                        nFullyInOrOut++;
+                        stats.nFullyOut++;
                     }
                 }
             }
@@ -615,6 +692,9 @@ public class ZeroTriangles : MonoBehaviour {
         }
     }
 
+
+    //-----------------------------------------------------
+    //-----------------------------------------------------
 
     // Draw a vertex at the "zero surface", if applicable.
 
@@ -655,6 +735,9 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
+    //-----------------------------------------------------
+    //-----------------------------------------------------
+
     //
     // Utils for vectors
     //
@@ -694,6 +777,9 @@ public class ZeroTriangles : MonoBehaviour {
         return result;
     }
 
+    //-----------------------------------------------------
+
+    //-----------------------------------------------------
 
     public void CheckPrimitiveTriangle(Vector3Int v1, Vector3Int v2, Vector3Int v3, int inMid, int mesh)
     {
@@ -706,7 +792,9 @@ public class ZeroTriangles : MonoBehaviour {
         if (inMid == 0) AddQuadBoth(IntVectorToWorld(v1), IntVectorToWorld(v2), IntVectorToWorld(v4), IntVectorToWorld(v3), mesh);
     }
 
+    //-----------------------------------------------------
 
+    //-----------------------------------------------------
     //
     // "Generic" handlers for the shapes, and their internal "primative" triangles.
     //
@@ -719,7 +807,7 @@ public class ZeroTriangles : MonoBehaviour {
 
     public void CheckFlatFace(Vector3Int v00, Vector3Int v0C, Vector3Int vCC, Vector3Int vC0, int mesh, Vector3Int vu00to0C, Vector3Int vu00toC0)
     {
-        // "Middle" points.
+        // "Middle" points of possible triangular sub-facets...
 
         Vector3Int v36 = MixVectors3Int(v00, vu00toC0, 3, vu00to0C, 6);
         Vector3Int v69 = MixVectors3Int(v00, vu00toC0, 6, vu00to0C, 9);
@@ -736,7 +824,8 @@ public class ZeroTriangles : MonoBehaviour {
         if (in36 == 0 && in69 == 0 && in96 == 0 && in63 == 0)
         {
             AddQuadBoth(IntVectorToWorld(v00), IntVectorToWorld(v0C), IntVectorToWorld(vC0), IntVectorToWorld(vCC), mesh);
-            nFullFlats++;
+
+            stats.nFullFlats++;
         }
         else if (in36 == 0 || in69 == 0 || in96 == 0 || in63 == 0)
         {
@@ -752,6 +841,8 @@ public class ZeroTriangles : MonoBehaviour {
             CheckPrimitiveTriangle(v00, v0C, v66, in36, mesh);
             CheckPrimitiveTriangle(v0C, vCC, v66, in69, mesh);
             CheckPrimitiveTriangle(vCC, vC0, v66, in96, mesh);
+
+            stats.nPartialFlats++;
         }
     }
 
@@ -804,7 +895,8 @@ public class ZeroTriangles : MonoBehaviour {
             && in886 == 0 && in998 == 0 && in778 == 0 && in88A == 0)
         {
             AddQuadBoth(IntVectorToWorld(v000), IntVectorToWorld(v00C), IntVectorToWorld(vCC0), IntVectorToWorld(vCCC), mesh);
-            nFullDiagonals++;
+
+            stats.nFullDiagonals++;
         }
         else if (in442 == 0 || in334 == 0 || in226 == 0 || in554 == 0 || in446 == 0 || in338 == 0
             || in558 == 0 || in44A == 0 || in882 == 0 || in994 == 0 || inAA6 == 0 || in774 == 0
@@ -847,6 +939,8 @@ public class ZeroTriangles : MonoBehaviour {
             CheckPrimitiveTriangle(v888, vCCC, v996, in998, mesh);      // 13
             CheckPrimitiveTriangle(v666, v66C, v888, in778, mesh);      // 14
             CheckPrimitiveTriangle(v66C, vCCC, v888, in88A, mesh);      // 15
+
+            stats.nPartialDiagonals++;
         }
     }
 
@@ -890,7 +984,8 @@ public class ZeroTriangles : MonoBehaviour {
             && in435 == 0 && in345 == 0 && in354 == 0 && in453 == 0 && in543 == 0 && in534 == 0)
         {
             AddTriangleBoth(IntVectorToWorld(v00C), IntVectorToWorld(v0C0), IntVectorToWorld(vC00), mesh);
-            nFullCorners++;
+
+            stats.nFullCorners++;
         }
         else if (in417 == 0 || in147 == 0 || in174 == 0 || in471 == 0 || in741 == 0 || in714 == 0
             || in435 == 0 || in345 == 0 || in354 == 0 || in453 == 0 || in543 == 0 || in534 == 0)
@@ -921,9 +1016,14 @@ public class ZeroTriangles : MonoBehaviour {
             CheckPrimitiveTriangle(v660, v444, v363, in453, mesh);             // 9
             CheckPrimitiveTriangle(v633, v444, v660, in543, mesh);             // 10
             CheckPrimitiveTriangle(v606, v444, v633, in534, mesh);             // 11
+
+            stats.nPartialCorners++;
         }
     }
 
+
+    //-----------------------------------------------------
+    //-----------------------------------------------------
 
     //
     // Mesh utils...
@@ -989,6 +1089,9 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
+    //-----------------------------------------------------
+    //-----------------------------------------------------
+
     //
     // "Zero triangle" test utils...
     //
@@ -1001,6 +1104,7 @@ public class ZeroTriangles : MonoBehaviour {
     }
 
 
+    // 
     public int CanFormTriangleEx(int s1, int s2, int s3)
     {
         int nResult;
@@ -1030,6 +1134,8 @@ public class ZeroTriangles : MonoBehaviour {
         return nResult;
     }
 
+
+    // Only put vertex spheres at "true" zero points.
 
     public int CanFormTriangleVertex(int s1, int s2, int s3)
     {
