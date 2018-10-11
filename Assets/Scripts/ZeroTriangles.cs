@@ -92,6 +92,9 @@ public class ZeroTriangles : MonoBehaviour {
     public Material vertexMaterialMarkS;
     public Material vertexMaterialMarkE;
 
+    public Material vertexMaterialConstruction;
+    public Material vertexMaterialConstructionOff;
+
     // Mesh gameobjects.
     public GameObject mfMain;
 
@@ -151,8 +154,8 @@ public class ZeroTriangles : MonoBehaviour {
 
     // Cache the cube corner info for each layer of (x,y) as we move through z
     private CellData[,,] xcc;    // x,y, layer (0,1)
-    private int xccAL;
-    private int xccWL;
+    private int xccActiveLayer;
+    private int xccWriteLayer;
 
     public ZeroTriangleStats GetStats()
     {
@@ -437,9 +440,27 @@ public class ZeroTriangles : MonoBehaviour {
 
     private void CheckSubCell(int s1, int s2, int s3, ref int typeCount)
     {
-        if (CanFormTriangleVertex(s1, s2, s3) == 1)
+        int cftv = CanFormTriangleVertex(s1, s2, s3);
+        if (cftv == 1)
         {
+            ///DrawVertex(GridToWorld(s1), GridToWorld(s2), GridToWorld(s3), vertexMaterialConstruction);
             typeCount++;
+        }
+        else if (cftv == -1)
+        {
+            ///DrawVertex(GridToWorld(s1), GridToWorld(s2), GridToWorld(s3), vertexMaterialConstructionOff);
+
+        }
+        else if (cftv == 0)
+        {
+            // ZERO!! error!
+            //throw System.Exception; //("ERROR!!! subcell coords should not be on a zer0 surface!!!");
+            Debug.Log("cftv == 0  !!!");
+        }
+        else if (cftv == -2)
+        {
+            // border!! ERROR
+ //           Debug.Log("cftv == -2  !!!");
         }
     }
 
@@ -498,8 +519,8 @@ public class ZeroTriangles : MonoBehaviour {
 
         // Set the "swappping" cache pointers.
 
-        xccAL = 0;
-        xccWL = 1;
+        xccActiveLayer = 0;
+        xccWriteLayer = 1;
 
 
         float x0;
@@ -526,8 +547,11 @@ public class ZeroTriangles : MonoBehaviour {
                     int intXfull = intX * 12;
 
                     stats.nCellCount++;
-                    /// >>>  MeasureCell(intXfull, intYfull, intZfull);
+                    //MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
 
+                    /// >>>  
+                    /// 
+                    /// 
                     x0 = GridToWorld(intXfull);
 
                     int nIsSet000;
@@ -540,77 +564,258 @@ public class ZeroTriangles : MonoBehaviour {
                     int nIsSet111;
 
 
+
+//                    Debug.Log("=====================================================================================");
+//                    Debug.Log(intX.ToString() + ", " + intY.ToString() + " ," + intZ.ToString());
+
+
                     // Get from generic position.
 
                     //
                     // Sync cache.
                     //
+                    // During this pass, the "Active" layer is "Z", the "Write" layer is for the "next "Z + 1" layer...
+                    // When the Z layer is done, the pointers are swapped,
+                    //  so the "active" layer is now for the "bottom" (can be read from cache) and the "write" layer is for the "top" of the current cube...
+                    //
+                    // NOTE: Will always compute nIsSet111 (at the end). This cannot come from cache.
 
-                    if (intZ == 0)
+                    if (intZ == 0)      // ------------------ >>> z = 0 the very bottom slice...
                     {
-                        // Case #1: X is 0. Y is 0. Z is 0.
-                        //
-                        // For this case, must compute everything!
-                        nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
-                        nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
-                        nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
-                        nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+                        // We may be on the very bottom slice, but we may be able to use values already computed...
 
-                        nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
-                        nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
-                        nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+                        if (intY == 0)
+                        {
+                            if (intX == 0)
+                            {
+                                // z = 0, y = 0, x = 0
 
-                        xcc[intX, intY, xccWL].status = nIsSet001;
-                        xcc[intX + 1, intY, xccWL].status = nIsSet101;
-                        xcc[intX, intY + 1, xccWL].status = nIsSet011;
+                                // For this case, must compute & cache everything (except for pos 1,1,1 which is always done last)!
+
+                                nIsSet000 = CanFormTriangleEx(intXfull, intYfull, intZfull);
+                                nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                                nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                                nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+
+                                nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                                nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                                nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+
+                                // write "bottom" and "top" face to cache.
+
+                                xcc[intX, intY, xccActiveLayer].status = nIsSet000;
+                                xcc[intX + 1, intY, xccActiveLayer].status = nIsSet100;
+                                xcc[intX, intY + 1, xccActiveLayer].status = nIsSet010;
+                                xcc[intX + 1, intY + 1, xccActiveLayer].status = nIsSet110;
+                                    // Only write to this ActiveLayer when z = 0!
+
+                                xcc[intX, intY, xccWriteLayer].status = nIsSet001;
+                                xcc[intX + 1, intY, xccWriteLayer].status = nIsSet101;
+                                xcc[intX, intY + 1, xccWriteLayer].status = nIsSet011;
+
+                            }
+                            else 
+                            {
+                                // z = 0, y = 0, x > 0.
+
+                                // We have just stepped into the cache.
+                                // We can look back to the last cell to get the "left" face of the cell (x = 0)
+
+                                nIsSet000 = xcc[intX, intY, xccActiveLayer].status;
+                                nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                                nIsSet010 = xcc[intX, intY + 1, xccActiveLayer].status;
+                                nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;
+                                nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                                nIsSet011 = xcc[intX, intY + 1, xccWriteLayer].status;
+
+                                // Write new vertices to cache.
+
+                                xcc[intX + 1, intY, xccActiveLayer].status = nIsSet100;
+                                xcc[intX + 1, intY + 1, xccActiveLayer].status = nIsSet110;
+                                    // Only write to this ActiveLayer when z = 0!
+
+                                xcc[intX + 1, intY, xccWriteLayer].status = nIsSet101;
+                            }
+
+
+                        }
+                        else
+                        {
+                            // intY is not zero, so even though we shouldn't read the "write" layer, we CAN look at the previous Y row.
+
+                            if (intX == 0)
+                            {
+                                // z = 0, y > 0, x = 0
+
+                                // We have just stepped into  new row in the cache.
+
+                                nIsSet000 = xcc[intX, intY, xccActiveLayer].status;
+                                nIsSet100 = xcc[intX + 1, intY, xccActiveLayer].status;
+                                nIsSet010 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                                nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;
+                                nIsSet101 = xcc[intX + 1, intY, xccWriteLayer].status; 
+                                nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+
+                                // Write new vertices to cache.
+
+                                xcc[intX, intY + 1, xccActiveLayer].status = nIsSet010;
+                                xcc[intX + 1, intY + 1, xccActiveLayer].status = nIsSet110;
+                                    // Only write to this ActiveLayer when z = 0!
+
+                                xcc[intX, intY + 1, xccWriteLayer].status = nIsSet011;
+                            }
+                            else
+                            {
+                                // z = 0, y > 0, x > 0
+
+                                // We are in the middle of a row in the middle of the bottom plane...
+
+                                nIsSet000 = xcc[intX, intY, xccActiveLayer].status;
+                                nIsSet100 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                                nIsSet010 = xcc[intX, intY + 1, xccActiveLayer].status;
+                                nIsSet110 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;
+                                nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                                nIsSet011 = xcc[intX, intY + 1, xccWriteLayer].status;
+
+                                // Write new vertices to cache.
+
+                                xcc[intX + 1, intY + 1, xccActiveLayer].status = nIsSet110;
+                                    // Only write to this ActiveLayer when z = 0!
+
+                                xcc[intX + 1, intY, xccWriteLayer].status = nIsSet101;
+
+                            }
+
+                        }
 
                     }
-                    else
+                    else                // ------------------ >>> z > 0, we are well into the cache...
                     {
-                        // Get from previous z slice!
-                        nIsSet000 = xcc[intX, intY, xccAL].status;
-                        nIsSet100 = xcc[intX + 1, intY, xccAL].status;
-                        nIsSet010 = xcc[intX, intY + 1, xccAL].status;
-                        nIsSet110 = xcc[intX + 1, intY + 1, xccAL].status;
+                        // Get the "bottom" of this cube from previous z slice!
+                        nIsSet000 = xcc[intX, intY, xccActiveLayer].status;
+                        nIsSet100 = xcc[intX + 1, intY, xccActiveLayer].status;
+                        nIsSet010 = xcc[intX, intY + 1, xccActiveLayer].status;
+                        nIsSet110 = xcc[intX + 1, intY + 1, xccActiveLayer].status;
+
+                        // We are not on the very bottom z-slice, but we may be on the edge...
+
+                        if (intY == 0)
+                        {
+
+                            if (intX == 0)
+                            {
+                                // z > 0, y = 0, x = 0.
+
+                                // For this case, must compute new values for the top of the cube!
+                                nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                                nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                                nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+
+                                // Write new vertices to cache.
+
+                                xcc[intX, intY, xccWriteLayer].status = nIsSet001;
+                                xcc[intX + 1, intY, xccWriteLayer].status = nIsSet101;
+                                xcc[intX, intY + 1, xccWriteLayer].status = nIsSet011;
+
+                            }
+                            else
+                            {
+                                // z > 0, y = 0, x > 0.
+
+                                // For this case, must compute a value.
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;
+                                nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                                nIsSet011 = xcc[intX, intY + 1, xccWriteLayer].status;
+
+                                // Write new vertices to cache.
+
+                                xcc[intX + 1, intY, xccWriteLayer].status = nIsSet101;
+
+
+                            }
+
+                        }
+                        else
+                        {
+                            if (intX == 0)
+                            {
+                                // z > 0, y > 0, x = 0.
+
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;
+                                nIsSet101 = xcc[intX + 1, intY, xccWriteLayer].status;
+
+                                nIsSet011 = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+
+                                // Save new value to cache.
+
+                                xcc[intX, intY + 1, xccWriteLayer].status = nIsSet011;
+                            }
+                            else
+                            {
+                                // Just check cache!
+                                nIsSet011 = xcc[intX, intY + 1, xccWriteLayer].status;      // was WL!
+                                nIsSet001 = xcc[intX, intY, xccWriteLayer].status;          // was WL!!!
+                                nIsSet101 = xcc[intX + 1, intY, xccWriteLayer].status;
+
+                                // NOTE: Here, in the "generic" position, the only thing to add is the new point!
+                            }
+                        }
                     }
-
-
-                    if (intY == 0)
-                    {
-                        // For this case, must compute new y values!
-                        nIsSet001 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
-                        nIsSet101 = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
-
-                        //xcc[intX, intY, xccWL].status = nIsSet001;
-                        //xcc[intX + 1, intY, xccWL].status = nIsSet101;
-
-                    }
-                    else
-                    {
-                        // Get from previous y run!
-                        nIsSet001 = xcc[intX, intY - 1, xccWL].status;
-                        nIsSet101 = xcc[intX + 1, intY - 1, xccWL].status;
-                    }
-
-
-                    if (intX == 0)
-                    {
-                        // For this case, must compute new x values!
-                        nIsSet011 = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
-                    }
-                    else
-                    {
-                        // Get from previous x shot!
-                        nIsSet011 = xcc[intX - 1, intY, xccWL].status;
-                    }
-
-
 
                     // Compute last new vertex for this cube cell.
                     nIsSet111 = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
 
                     // Save to cache
-                    xcc[intX + 1, intY + 1, xccWL].status = nIsSet111;
+                    xcc[intX + 1, intY + 1, xccWriteLayer].status = nIsSet111;
+
+
+                    // >>>>>>>>>>>>>
+                    /*
+                    if (false) // check cache!
+                    {
+                        int nCacheErrors1 = 0;
+                        int nCacheErrors2 = 0;
+                        int nCacheErrors3 = 0;
+                        int nCacheErrors4 = 0;
+                        int nCacheErrors5 = 0;
+                        int nCacheErrors6 = 0;
+                        int nCacheErrors7 = 0;
+                        int nCacheErrors8 = 0;
+
+                        int nIsSet000new = CanFormTriangleEx(intXfull, intYfull, intZfull);
+                        int nIsSet010new = CanFormTriangleEx(intXfull, intYfull + 12, intZfull);
+                        int nIsSet100new = CanFormTriangleEx(intXfull + 12, intYfull, intZfull);
+                        int nIsSet110new = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull);
+
+                        int nIsSet001new = CanFormTriangleEx(intXfull, intYfull, intZfull + 12);
+                        int nIsSet011new = CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12);
+                        int nIsSet101new = CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12);
+                        int nIsSet111new = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
+
+
+                        if (nIsSet000 != CanFormTriangleEx(intXfull, intYfull, intZfull)) nCacheErrors1++;
+                        if (nIsSet010 != CanFormTriangleEx(intXfull, intYfull + 12, intZfull)) nCacheErrors2++;
+                        if (nIsSet100 != CanFormTriangleEx(intXfull + 12, intYfull, intZfull)) nCacheErrors3++;
+                        if (nIsSet110 != CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull)) nCacheErrors4++;
+
+                        if (nIsSet001 != CanFormTriangleEx(intXfull, intYfull, intZfull + 12)) nCacheErrors5++;
+                        if (nIsSet011 != CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12)) nCacheErrors6++;
+                        if (nIsSet101 != CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12)) nCacheErrors7++;
+                        if (nIsSet111 != CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12)) nCacheErrors8++;
+
+                        if (nCacheErrors1 != 0 || nCacheErrors2 != 0 || nCacheErrors3 != 0 || nCacheErrors4 != 0 || nCacheErrors5 != 0 || nCacheErrors6 != 0 || nCacheErrors7 != 0 || nCacheErrors8 != 0)
+                        {
+                            int nCacheErrors = nCacheErrors1 + nCacheErrors2 + nCacheErrors3 + nCacheErrors4 + nCacheErrors5 + nCacheErrors6 + nCacheErrors7 + nCacheErrors8;
+                            Debug.Log("Cache errors: " + nCacheErrors.ToString() + "(" + intX + "," + intY + "," + intZ + ")");
+                        }
+                    }
+                    */
 
 
                     // Don't bother if cube corners are all fully in or fully out.
@@ -633,7 +838,10 @@ public class ZeroTriangles : MonoBehaviour {
 
                         if (parameters.displayVertices)
                         {
-                            DrawVertex(intXfull, intYfull, intZfull, x0, y0, z0);
+                            if (CanFormTriangleVertex(intXfull, intYfull, intZfull) == 0)
+                            {
+                                DrawVertex(x0, y0, z0, vertexMaterial);
+                            }
                         }
 
 
@@ -678,6 +886,17 @@ public class ZeroTriangles : MonoBehaviour {
                     else
                     {
                         stats.nFullyOut++;
+                        /*
+                        int cellsB = stats.nSubCellsB;
+                        int cellsS = stats.nSubCellsS;
+                        int cellsE = stats.nSubCellsE;
+                        MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
+
+                        if (cellsB != stats.nSubCellsB || cellsS != stats.nSubCellsS || cellsE != stats.nSubCellsE)
+                        {
+                            Debug.Log("fullyout");
+                        }
+                        */
                     }
                 }
             }
@@ -686,9 +905,9 @@ public class ZeroTriangles : MonoBehaviour {
             // We have done the entire x-y slab.
             // Now, swap xcc cache, and proceed to next slab in the z direction.
 
-            int temp = xccAL;
-            xccAL = xccWL;
-            xccWL = temp;
+            int temp = xccActiveLayer;
+            xccActiveLayer = xccWriteLayer;
+            xccWriteLayer = temp;
         }
     }
 
@@ -698,21 +917,18 @@ public class ZeroTriangles : MonoBehaviour {
 
     // Draw a vertex at the "zero surface", if applicable.
 
-    public void DrawVertex(int xFull, int yFull, int zFull, float x0, float y0, float z0)
+    public void DrawVertex(float x0, float y0, float z0, Material material)
     {
-        if (CanFormTriangleVertex(xFull, yFull, zFull) == 0)
-        {
-            s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            s.transform.parent = mfMain.transform;
+        s = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        s.transform.parent = mfMain.transform;
 
-            s.transform.localPosition = new Vector3(x0, y0, z0);
-            s.transform.localScale = new Vector3(parameters.scale, parameters.scale, parameters.scale);
+        s.transform.localPosition = new Vector3(x0, y0, z0);
+        s.transform.localScale = new Vector3(parameters.scale, parameters.scale, parameters.scale);
 
-            s.GetComponent<Renderer>().material = vertexMaterial;
-            s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        s.GetComponent<Renderer>().material = material;
+        s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
-            myList.Add(s);
-        }
+        myList.Add(s);
     }
 
 
@@ -1107,6 +1323,7 @@ public class ZeroTriangles : MonoBehaviour {
     // 
     public int CanFormTriangleEx(int s1, int s2, int s3)
     {
+
         int nResult;
         if (parameters.dropdownEdgesInt == 2)
         {
@@ -1171,6 +1388,39 @@ public class ZeroTriangles : MonoBehaviour {
         if (s1 < 0 || s1 > parameters.nFullDivisions) return -2;
         if (s2 < 0 || s2 > parameters.nFullDivisions) return -2;
         if (s3 < 0 || s3 > parameters.nFullDivisions) return -2;
+
+        //==============
+
+        // test 3 - 4 divs first easy fail.
+
+        // try : x1 = x2 planes
+        int test = 0;
+
+        switch (test)
+        {
+            case 1: // ok
+                if (s1 > s2) return -1;
+                if (s1 == s2) return 0;
+                return 1;
+            case 2:
+                if (s1 > s3) return -1;
+                if (s1 == s3) return 0;
+                return 1;
+            case 3:
+                if (s2 > s3) return -1;
+                if (s2 == s3) return 0;
+                return 1;
+
+            case 4: // ok
+                if (s1 + s2 < parameters.nFullDivisions) return -1;
+                if (s1 + s2 == parameters.nFullDivisions) return 0;
+                return 1;
+
+        }
+
+
+        //
+        //==============
 
         if (s1 > s2 + s3) return -1;
         if (s2 > s1 + s3) return -1;
