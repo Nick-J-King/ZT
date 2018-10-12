@@ -798,15 +798,15 @@ public class ZeroTriangles : MonoBehaviour {
                         int nIsSet111new = CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12);
 
 
-                        if (nIsSet000 != CanFormTriangleEx(intXfull, intYfull, intZfull)) nCacheErrors1++;
-                        if (nIsSet010 != CanFormTriangleEx(intXfull, intYfull + 12, intZfull)) nCacheErrors2++;
-                        if (nIsSet100 != CanFormTriangleEx(intXfull + 12, intYfull, intZfull)) nCacheErrors3++;
-                        if (nIsSet110 != CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull)) nCacheErrors4++;
+                        if (nIsSet000 != nIsSet000new) nCacheErrors1++;
+                        if (nIsSet010 != nIsSet010new) nCacheErrors2++;
+                        if (nIsSet100 != nIsSet100new) nCacheErrors3++;
+                        if (nIsSet110 != nIsSet110new) nCacheErrors4++;
 
-                        if (nIsSet001 != CanFormTriangleEx(intXfull, intYfull, intZfull + 12)) nCacheErrors5++;
-                        if (nIsSet011 != CanFormTriangleEx(intXfull, intYfull + 12, intZfull + 12)) nCacheErrors6++;
-                        if (nIsSet101 != CanFormTriangleEx(intXfull + 12, intYfull, intZfull + 12)) nCacheErrors7++;
-                        if (nIsSet111 != CanFormTriangleEx(intXfull + 12, intYfull + 12, intZfull + 12)) nCacheErrors8++;
+                        if (nIsSet001 != nIsSet001new) nCacheErrors5++;
+                        if (nIsSet011 != nIsSet011new) nCacheErrors6++;
+                        if (nIsSet101 != nIsSet101new) nCacheErrors7++;
+                        if (nIsSet111 != nIsSet111new) nCacheErrors8++;
 
                         if (nCacheErrors1 != 0 || nCacheErrors2 != 0 || nCacheErrors3 != 0 || nCacheErrors4 != 0 || nCacheErrors5 != 0 || nCacheErrors6 != 0 || nCacheErrors7 != 0 || nCacheErrors8 != 0)
                         {

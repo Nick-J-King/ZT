@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
 
     void ComputeGeometryAndGetStats()
     {
-        frame.SetEdges(zeroTriangles.parameters.sliderFullInt, zeroTriangles.parameters.sliderFullInt5thEdge, zeroTriangles.parameters.nFullDivisions, 4);
+        frame.SetEdges(zeroTriangles.parameters.sliderFullInt, zeroTriangles.parameters.sliderFullInt5thEdge, zeroTriangles.parameters.nFullDivisions, zeroTriangles.parameters.dropdownEdgesInt + 3);
         zeroTriangles.ComputeGeometry();
 
         ZeroTriangleStats stats = zeroTriangles.GetStats();
