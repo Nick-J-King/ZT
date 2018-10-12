@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+
 // Data for main (full) grid cache.
 // These are the "corner" points of the 12 x 12 x 12 cells.
 // Used to quickly skip over full / empty cells.
@@ -25,6 +26,8 @@ public struct ZeroTriangleParameters
     public int nFullDivisions; // nDivisions * 12 for finers sub-divisions.
 
     public bool displayVertices;
+    public bool computeVolume;
+    public bool validate;
 
     public float scale;
 
@@ -70,8 +73,13 @@ public struct ZeroTriangleStats
     public int nCellCount;
 
     public float fVolume;
+    public bool volumeComputed;
+
     public float fTimePerFigure;
     public float fTimePerCell;
+
+    public bool validated;
+    public int errorCode;
 }
 
 
@@ -115,27 +123,7 @@ public class ZeroTriangles : MonoBehaviour {
 
 
     // PRIVATE members --------------------------
-    /*
-    private int nFullFlats;
-    private int nFullDiagonals;
-    private int nFullCorners;
 
-    private int nPartialFlats;
-    private int nPartialDiagonals;
-    private int nPartialCorners;
-
-
-    // Sub-cell counts.
-    private int nSubCellsB;     // "Big"
-    private int nSubCellsS;     // "Small"
-    private int nSubCellsE;     // "Edge"
-
-    private int nFullyIn;
-    private int nFullyOut;
-
-    private int nMeasured;
-    private int nCellCount;
-*/
     // Internal cache for building meshes.
     private int[] myNumVerts;
     private int[] myNumTriangles;
@@ -147,6 +135,10 @@ public class ZeroTriangles : MonoBehaviour {
 
     private int MAXTVERTS = 65530;
 
+    public int ERROR_CACHE = 1;
+    public int ERROR_VOLUME_IN_FULL_OUT = 2;
+    public int ERROR_NOT_FULL_VOLUME_IN_FULL_IN = 3;
+
     // List of vertex spheres.
     private GameObject s;
     private ArrayList myList;
@@ -157,10 +149,12 @@ public class ZeroTriangles : MonoBehaviour {
     private int xccActiveLayer;
     private int xccWriteLayer;
 
+
     public ZeroTriangleStats GetStats()
     {
         return stats;
     }
+
 
     // Use this for initialization
     public void Initialise()
@@ -202,7 +196,7 @@ public class ZeroTriangles : MonoBehaviour {
     // We have the internal parameters set.
     // Now, compute the geometry of the figure.
    
-    public float ComputeGeometry()
+    public void ComputeGeometry()
     {
 
         float start = Time.realtimeSinceStartup;
@@ -225,6 +219,11 @@ public class ZeroTriangles : MonoBehaviour {
         stats.nFullyOut = 0;
         stats.nMeasured = 0;
         stats.nCellCount = 0;
+
+        stats.errorCode = 0;
+        stats.validated = parameters.validate;
+        stats.volumeComputed = parameters.computeVolume;
+        stats.fVolume = 0.0f;
 
         // Clear away all vertices & meshes...
 
@@ -251,15 +250,12 @@ public class ZeroTriangles : MonoBehaviour {
         }
 
         float elapsed = Time.realtimeSinceStartup - start;
-        Debug.Log("elapsed: " + elapsed.ToString());
 
         stats.fTimePerFigure = elapsed;
         stats.fTimePerCell = elapsed / stats.nCellCount;
 
         float vol = CalculateVolume();   // Calculate the volume from (cell) counts...
         stats.fVolume = vol;
-
-        return vol;
     }
 
 
@@ -470,6 +466,11 @@ public class ZeroTriangles : MonoBehaviour {
 
     public float CalculateVolume()
     {
+        if (!parameters.computeVolume)
+        {
+            return 0.0f;
+        }
+
         int denominator = parameters.nDivisions * parameters.nDivisions * parameters.nDivisions * 144;
         int numerator = 3 * stats.nSubCellsB + stats.nSubCellsS + stats.nSubCellsE + 144 * stats.nFullyIn;
 
@@ -775,9 +776,7 @@ public class ZeroTriangles : MonoBehaviour {
                     xcc[intX + 1, intY + 1, xccWriteLayer].status = nIsSet111;
 
 
-                    // >>>>>>>>>>>>>
-                    /*
-                    if (false) // check cache!
+                    if (parameters.validate) // check cache!
                     {
                         int nCacheErrors1 = 0;
                         int nCacheErrors2 = 0;
@@ -813,16 +812,19 @@ public class ZeroTriangles : MonoBehaviour {
                         {
                             int nCacheErrors = nCacheErrors1 + nCacheErrors2 + nCacheErrors3 + nCacheErrors4 + nCacheErrors5 + nCacheErrors6 + nCacheErrors7 + nCacheErrors8;
                             Debug.Log("Cache errors: " + nCacheErrors.ToString() + "(" + intX + "," + intY + "," + intZ + ")");
+                            stats.errorCode = ERROR_CACHE;
                         }
                     }
-                    */
 
 
                     // Don't bother if cube corners are all fully in or fully out.
                     if (nIsSet000 == 0 || nIsSet100 == 0 || nIsSet010 == 0 || nIsSet110 == 0 || nIsSet001 == 0 || nIsSet101 == 0 || nIsSet011 == 0 || nIsSet111 == 0)
                     {
-                        stats.nMeasured++;
-                        MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
+                        if (parameters.computeVolume)
+                        {
+                            stats.nMeasured++;
+                            MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
+                        }
 
                         Vector3Int v000i = new Vector3Int(intXfull, intYfull, intZfull);
                         Vector3Int v100i = new Vector3Int(intXfull + 12, intYfull, intZfull);
@@ -880,23 +882,41 @@ public class ZeroTriangles : MonoBehaviour {
                     }
                     else if (nIsSet000 == 1 && nIsSet100 == 1 && nIsSet010 == 1 && nIsSet110 == 1 && nIsSet001 == 1 && nIsSet101 == 1 && nIsSet011 == 1 && nIsSet111 == 1)
                     {
-
                         stats.nFullyIn++;
+
+                        if (parameters.validate)
+                        {
+                            int cellsB = 0;
+                            int cellsS = 0;
+                            int cellsE = 0;
+
+                            MeasureCell(intXfull, intYfull, intZfull, ref cellsB, ref cellsS, ref cellsE);
+
+                            if (cellsB != 24 || cellsS != 24 || cellsE != 48)
+                            {
+                                Debug.Log("fully in mismatch");
+                                stats.errorCode = ERROR_NOT_FULL_VOLUME_IN_FULL_IN;
+                            }
+                        }
                     }
                     else
                     {
                         stats.nFullyOut++;
-                        /*
-                        int cellsB = stats.nSubCellsB;
-                        int cellsS = stats.nSubCellsS;
-                        int cellsE = stats.nSubCellsE;
-                        MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
 
-                        if (cellsB != stats.nSubCellsB || cellsS != stats.nSubCellsS || cellsE != stats.nSubCellsE)
+                        if (parameters.validate)
                         {
-                            Debug.Log("fullyout");
+                            int cellsB = 0;
+                            int cellsS = 0;
+                            int cellsE = 0;
+
+                            MeasureCell(intXfull, intYfull, intZfull, ref cellsB, ref cellsS, ref cellsE);
+
+                            if (cellsB != 0 || cellsS != 0 || cellsE != 0)
+                            {
+                                Debug.Log("fully out mismatch");
+                                stats.errorCode = ERROR_VOLUME_IN_FULL_OUT;
+                            }
                         }
-                        */
                     }
                 }
             }

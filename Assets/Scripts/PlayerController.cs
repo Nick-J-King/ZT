@@ -11,33 +11,11 @@ public class PlayerController : MonoBehaviour
     // The main figure...
     public ZeroTriangles zeroTriangles;
 
+
     public PanelStatusController panelStatus;
+    public PanelControlsController panelControls;
 
-    // Controls on panel.
-    public Text textDivisions;
-    public Slider sliderDivisions;
 
-    public Dropdown DropdownEdges;
-
-    public Text text4thEdge;
-    public Slider slider4thEdge;
-    public Slider slider5thEdge;
-
-    public Text textTitleLightAzimuthElevation;
-    public Slider sliderLightAzimuth;
-    public Slider sliderLightElevation;
-
-    public Toggle togglePoints;
-    public Slider sliderVertexSize;
-
-    public Toggle toggleAnimate;
-    public Slider SliderAnimateSpeed;
-
-    public Toggle toggleFlip;
-    public Toggle toggleFrame;
-    public Toggle toggleClosure;
-
-    public Text textStatus;
 
     public GameObject goFrame;
 
@@ -61,31 +39,11 @@ public class PlayerController : MonoBehaviour
 
     void ComputeGeometryAndGetStats()
     {
-        float volume = zeroTriangles.ComputeGeometry();
+        zeroTriangles.ComputeGeometry();
+
         ZeroTriangleStats stats = zeroTriangles.GetStats();
 
-        panelStatus.textFullFlats.text = "Full flats: " + stats.nFullFlats.ToString();
-        panelStatus.textFullDiagonals.text = "Full diagonals: " + stats.nFullDiagonals.ToString();
-        panelStatus.textFullCorners.text = "Full corners: " + stats.nFullCorners.ToString();
-
-        panelStatus.textPartialFlats.text = "Partial flats: " + stats.nPartialFlats.ToString();
-        panelStatus.textPartialDiagonals.text = "Partial diagonals: " + stats.nPartialDiagonals.ToString();
-        panelStatus.textPartialCorners.text = "Partial corners: " + stats.nPartialCorners.ToString();
-
-        panelStatus.textSubCellsB.text = "SubCellsB : " + stats.nSubCellsB.ToString();
-        panelStatus.textSubCellsS.text = "SubCellsS : " + stats.nSubCellsS.ToString();
-        panelStatus.textSubCellsE.text = "SubCellsE : " + stats.nSubCellsE.ToString();
-
-        panelStatus.textFullyIn.text = "Fully in: " + stats.nFullyIn.ToString();
-        panelStatus.textFullyOut.text = "Fully out: " + stats.nFullyOut.ToString();
-        panelStatus.textMeasured.text = "Measured: " + stats.nMeasured.ToString();
-        panelStatus.textCellCount.text = "Cell count: " + stats.nCellCount.ToString();
-    
-        panelStatus.textVolume.text = "Volume: " + stats.fVolume.ToString();
-
-        panelStatus.textTimePerFigure.text = "Time: " + stats.fTimePerFigure.ToString();
-        panelStatus.textTimePerCell.text = "Time/cell: " + stats.fTimePerCell.ToString();
-
+        panelStatus.SetStats(stats);
     }
 
 
@@ -98,10 +56,10 @@ public class PlayerController : MonoBehaviour
     // called per frame, before performing physics
     void Update()
     {
-        if (toggleAnimate.isOn)
+        if (panelControls.toggleAnimate.isOn)
         {
-            zeroTriangles.mfMain.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * SliderAnimateSpeed.value);
-            goFrame.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * SliderAnimateSpeed.value);
+            zeroTriangles.mfMain.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * panelControls.SliderAnimateSpeed.value);
+            goFrame.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * panelControls.SliderAnimateSpeed.value);
         }
     }
 
@@ -109,11 +67,11 @@ public class PlayerController : MonoBehaviour
     // Read the light controls, and update the directional light.
     public void SetLightFromControls()
     {
-        float y = 360.0f - sliderLightAzimuth.value;
-        float x = sliderLightElevation.value;
+        float y = 360.0f - panelControls.sliderLightAzimuth.value;
+        float x = panelControls.sliderLightElevation.value;
         float z = 0.0f;
 
-        textTitleLightAzimuthElevation.text = "Azm: " + y.ToString() + " Ele: " + x.ToString();
+        panelControls.textTitleLightAzimuthElevation.text = "Azm: " + y.ToString() + " Ele: " + x.ToString();
 
         directionalLight.transform.localRotation = Quaternion.Euler(x, y, z);
         directionalLight.transform.localPosition = Vector3.zero;
@@ -139,51 +97,63 @@ public class PlayerController : MonoBehaviour
         bool changed = false;
 
         // Lattice divisions.
-        if (zeroTriangles.parameters.nDivisions != (int)sliderDivisions.value)
+        if (zeroTriangles.parameters.nDivisions != (int)panelControls.sliderDivisions.value)
         {
-            zeroTriangles.parameters.nDivisions = (int)sliderDivisions.value;
+            zeroTriangles.parameters.nDivisions = (int)panelControls.sliderDivisions.value;
             changed = true;
         }
 
-        textDivisions.text = "Divisions: " + zeroTriangles.parameters.nDivisions.ToString();
+        panelControls.textDivisions.text = "Divisions: " + zeroTriangles.parameters.nDivisions.ToString();
 
         // Edges
-        if (zeroTriangles.parameters.dropdownEdgesInt != DropdownEdges.value)
+        if (zeroTriangles.parameters.dropdownEdgesInt != panelControls.DropdownEdges.value)
         {
-            zeroTriangles.parameters.dropdownEdgesInt = DropdownEdges.value;
+            zeroTriangles.parameters.dropdownEdgesInt = panelControls.DropdownEdges.value;
             changed = true;
         }
 
         // 4th edge
-        float sliderFloat = slider4thEdge.value;
+        float sliderFloat = panelControls.slider4thEdge.value;
         int sliderInt = (int)(sliderFloat * (zeroTriangles.parameters.nDivisions + 1));
         if (sliderInt > zeroTriangles.parameters.nDivisions) sliderInt = zeroTriangles.parameters.nDivisions;
 
         // 5th edge
-        float sliderFloat5thEdge = slider5thEdge.value;
+        float sliderFloat5thEdge = panelControls.slider5thEdge.value;
         int sliderInt5thEdge = (int)(sliderFloat5thEdge * (zeroTriangles.parameters.nDivisions + 1));
         if (sliderInt5thEdge > zeroTriangles.parameters.nDivisions) sliderInt5thEdge = zeroTriangles.parameters.nDivisions;
 
 
-        text4thEdge.text = "Edges: " + sliderInt.ToString() + " " + sliderInt5thEdge.ToString();
+        panelControls.text4thEdge.text = "Edges: " + sliderInt.ToString() + " " + sliderInt5thEdge.ToString();
 
         // Vertices
-        if (zeroTriangles.parameters.displayVertices != togglePoints.isOn)
+        if (zeroTriangles.parameters.displayVertices != panelControls.togglePoints.isOn)
         {
-            zeroTriangles.parameters.displayVertices = togglePoints.isOn;
+            zeroTriangles.parameters.displayVertices = panelControls.togglePoints.isOn;
             changed = true;
         }
 
-        if (zeroTriangles.parameters.vertexSize != sliderVertexSize.value)
+        if (zeroTriangles.parameters.vertexSize != panelControls.sliderVertexSize.value)
         {
-            zeroTriangles.parameters.vertexSize = sliderVertexSize.value;
+            zeroTriangles.parameters.vertexSize = panelControls.sliderVertexSize.value;
             changed = true;
         }
 
 
-        if (zeroTriangles.parameters.doClosure != toggleClosure.isOn)
+        if (zeroTriangles.parameters.doClosure != panelControls.toggleClosure.isOn)
         {
-            zeroTriangles.parameters.doClosure = toggleClosure.isOn;
+            zeroTriangles.parameters.doClosure = panelControls.toggleClosure.isOn;
+            changed = true;
+        }
+
+        if (zeroTriangles.parameters.computeVolume != panelControls.toggleVolume.isOn)
+        {
+            zeroTriangles.parameters.computeVolume = panelControls.toggleVolume.isOn;
+            changed = true;
+        }
+
+        if (zeroTriangles.parameters.validate != panelControls.toggleValidate.isOn)
+        {
+            zeroTriangles.parameters.validate = panelControls.toggleValidate.isOn;
             changed = true;
         }
 
@@ -213,13 +183,13 @@ public class PlayerController : MonoBehaviour
 
     public void CheckFrameToggle()
     {
-        goFrame.SetActive(toggleFrame.isOn);
+        goFrame.SetActive(panelControls.toggleFrame.isOn);
     }
 
 
     public void CheckFlipToggle()
     {
-        if (toggleFlip.isOn)
+        if (panelControls.toggleFlip.isOn)
         {
             zeroTriangles.mfMain.transform.localScale = new Vector3(1.0f, -1.0f, 1.0f);
         }
@@ -232,8 +202,9 @@ public class PlayerController : MonoBehaviour
 
     public void ResetAnimation()
     {
-        toggleAnimate.isOn = false;
+        panelControls.toggleAnimate.isOn = false;
         zeroTriangles.mfMain.transform.localEulerAngles = Vector3.zero;
+        goFrame.transform.localEulerAngles = Vector3.zero;
     }
 
 
