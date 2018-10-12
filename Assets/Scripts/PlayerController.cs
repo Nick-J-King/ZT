@@ -11,13 +11,10 @@ public class PlayerController : MonoBehaviour
     // The main figure...
     public ZeroTriangles zeroTriangles;
 
-
     public PanelStatusController panelStatus;
     public PanelControlsController panelControls;
 
-
-
-    public GameObject goFrame;
+    public FrameController frame;
 
     // External game objects.
     public Light directionalLight;
@@ -39,6 +36,7 @@ public class PlayerController : MonoBehaviour
 
     void ComputeGeometryAndGetStats()
     {
+        frame.SetEdges(zeroTriangles.parameters.sliderFullInt, zeroTriangles.parameters.sliderFullInt5thEdge, zeroTriangles.parameters.nFullDivisions, 4);
         zeroTriangles.ComputeGeometry();
 
         ZeroTriangleStats stats = zeroTriangles.GetStats();
@@ -59,7 +57,7 @@ public class PlayerController : MonoBehaviour
         if (panelControls.toggleAnimate.isOn)
         {
             zeroTriangles.mfMain.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * panelControls.SliderAnimateSpeed.value);
-            goFrame.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * panelControls.SliderAnimateSpeed.value);
+            frame.transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), Time.deltaTime * 100.0f * panelControls.SliderAnimateSpeed.value);
         }
     }
 
@@ -183,7 +181,7 @@ public class PlayerController : MonoBehaviour
 
     public void CheckFrameToggle()
     {
-        goFrame.SetActive(panelControls.toggleFrame.isOn);
+        frame.SetActive(panelControls.toggleFrame.isOn);
     }
 
 
@@ -204,7 +202,7 @@ public class PlayerController : MonoBehaviour
     {
         panelControls.toggleAnimate.isOn = false;
         zeroTriangles.mfMain.transform.localEulerAngles = Vector3.zero;
-        goFrame.transform.localEulerAngles = Vector3.zero;
+        frame.transform.localEulerAngles = Vector3.zero;
     }
 
 
