@@ -29,6 +29,11 @@ public struct ZeroTriangleParameters
     public bool computeVolume;
     public bool validate;
 
+    public bool outerLoop;
+    public bool innerLoop;
+    public bool addTriangles;
+    public bool constructMesh;
+
     public float scale;
 
     public int sliderFullInt;
@@ -244,9 +249,12 @@ public class ZeroTriangles : MonoBehaviour {
 
 
         // Now put the list of triangles in each mesh.
-        for (int i = 0; i < 14; i++)
+        if (parameters.constructMesh)
         {
-            ProcessMesh(i);
+            for (int i = 0; i < 14; i++)
+            {
+                ProcessMesh(i);
+            }
         }
 
         float elapsed = Time.realtimeSinceStartup - start;
@@ -529,6 +537,10 @@ public class ZeroTriangles : MonoBehaviour {
         float z0;
 
 
+        if (!parameters.outerLoop) return;
+            // If we don't do the outer loop, abort now!
+
+
         // NOW, go through each cell...
 
         for (int intZ = 0; intZ <= parameters.nDivisions; intZ++)
@@ -547,13 +559,13 @@ public class ZeroTriangles : MonoBehaviour {
                 {
                     int intXfull = intX * 12;
 
-                    stats.nCellCount++;
-                    //MeasureCell(intXfull, intYfull, intZfull, ref stats.nSubCellsB, ref stats.nSubCellsS, ref stats.nSubCellsE);
-
-                    /// >>>  
-                    /// 
-                    /// 
                     x0 = GridToWorld(intXfull);
+
+                    stats.nCellCount++;
+
+                    if (!parameters.innerLoop) continue;
+                        // If we don't do the inner loop, skip the rest!
+
 
                     int nIsSet000;
                     int nIsSet100;
@@ -563,11 +575,6 @@ public class ZeroTriangles : MonoBehaviour {
                     int nIsSet101;
                     int nIsSet011;
                     int nIsSet111;
-
-
-
-//                    Debug.Log("=====================================================================================");
-//                    Debug.Log(intX.ToString() + ", " + intY.ToString() + " ," + intZ.ToString());
 
 
                     // Get from generic position.
@@ -1268,6 +1275,7 @@ public class ZeroTriangles : MonoBehaviour {
     public void AddQuadBoth(Vector3 v00, Vector3 v01, Vector3 v10, Vector3 v11, int mesh)
     {
         if (myNumVerts[mesh] > MAXTVERTS) return;
+        if (!parameters.addTriangles) return;
 
         myVerts[mesh].Add(v00);
         myVerts[mesh].Add(v10);
@@ -1303,6 +1311,7 @@ public class ZeroTriangles : MonoBehaviour {
     public void AddTriangleBoth(Vector3 v00, Vector3 v01, Vector3 v10, int mesh)
     {
         if (myNumVerts[mesh] > MAXTVERTS) return;
+        if (!parameters.addTriangles) return;
 
         myVerts[mesh].Add(v00);
         myVerts[mesh].Add(v01);

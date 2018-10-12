@@ -32,6 +32,11 @@ public class PanelControlsController : MonoBehaviour {
     public Toggle toggleVolume;
     public Toggle toggleValidate;
 
+    public Toggle toggleAddTriangles;
+    public Toggle toggleCreateMesh;
+    public Toggle toggleOuterLoop;
+    public Toggle toggleInnerLoop;
+
 
     // Use this for initialization
     void Start () {

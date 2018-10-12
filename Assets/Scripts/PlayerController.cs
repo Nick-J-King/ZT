@@ -155,6 +155,30 @@ public class PlayerController : MonoBehaviour
             changed = true;
         }
 
+        if (zeroTriangles.parameters.addTriangles != panelControls.toggleAddTriangles.isOn)
+        {
+            zeroTriangles.parameters.addTriangles = panelControls.toggleAddTriangles.isOn;
+            changed = true;
+        }
+
+        if (zeroTriangles.parameters.constructMesh != panelControls.toggleCreateMesh.isOn)
+        {
+            zeroTriangles.parameters.constructMesh = panelControls.toggleCreateMesh.isOn;
+            changed = true;
+        }
+
+        if (zeroTriangles.parameters.outerLoop != panelControls.toggleOuterLoop.isOn)
+        {
+            zeroTriangles.parameters.outerLoop = panelControls.toggleOuterLoop.isOn;
+            changed = true;
+        }
+
+        if (zeroTriangles.parameters.innerLoop != panelControls.toggleInnerLoop.isOn)
+        {
+            zeroTriangles.parameters.innerLoop = panelControls.toggleInnerLoop.isOn;
+            changed = true;
+        }
+
 
         // Internal parameters.
         zeroTriangles.parameters.nFullDivisions = zeroTriangles.parameters.nDivisions * 12;
